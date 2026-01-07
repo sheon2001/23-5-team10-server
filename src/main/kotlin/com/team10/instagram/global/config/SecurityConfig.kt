@@ -15,7 +15,6 @@ class SecurityConfig {
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
-
             // TODO : 현재는 모든 요청 허용중
             .authorizeHttpRequests { it.anyRequest().permitAll() }
         return http.build()
