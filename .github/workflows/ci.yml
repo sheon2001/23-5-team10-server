@@ -1,0 +1,30 @@
+name: CI (Build Check)
+
+on:
+  pull_request:
+    branches: [ "develop", "main" ] # PR 날릴 때마다 실행
+  push:
+    branches: [ "develop", "main" ] # 머지될 때도 실행
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        # -x test: DB 연결이 없어서 테스트가 실패할 수 있으니 일단 테스트 건너뛰기
+        run: ./gradlew clean build -x test
+        

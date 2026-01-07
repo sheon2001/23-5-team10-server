@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: instagram-team10
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/instagram?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: somepassword
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+### TODO : OAuth
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          kakao:
+#            client-id:
+#            client-secret:
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+#            client-authentication-method: client_secret_post
+#            scope:
+#              - profile_nickname
+#              - account_email
+
+jwt:
+  secret: this-is-a-very-long-and-secure-secret-key-for-jwt-token-generation
+  expiration-in-ms: 86400000
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.jdbc: DEBUG
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+    org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate: TRACE
