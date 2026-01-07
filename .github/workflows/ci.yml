@@ -27,3 +27,4 @@ jobs:
       - name: Build with Gradle
         # -x test: DB 연결이 없어서 테스트가 실패할 수 있으니 일단 테스트 건너뛰기
         run: ./gradlew clean build -x test
+        
