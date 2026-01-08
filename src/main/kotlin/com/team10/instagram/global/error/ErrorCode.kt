@@ -17,3 +17,4 @@ enum class ErrorCode(
     // 게시글 관련 에러 (예시)
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_404", "게시글을 찾을 수 없습니다."),
 }
+
