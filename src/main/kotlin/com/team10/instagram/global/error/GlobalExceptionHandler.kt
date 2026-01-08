@@ -23,4 +23,3 @@ class GlobalExceptionHandler {
             .body(ApiResponse.onFailure(ErrorCode.INTERNAL_SERVER_ERROR.code, ErrorCode.INTERNAL_SERVER_ERROR.message))
     }
 }
-
