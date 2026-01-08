@@ -84,3 +84,4 @@ CREATE TABLE IF NOT EXISTS story (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
     );
+
