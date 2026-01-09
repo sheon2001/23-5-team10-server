@@ -56,14 +56,12 @@ class StoryController {
         if (userId != currentUserId) {
             val otherStories =
                 listOf(
-                    StoryDetailResponse(10, "https://dummy.com/friend1.jpg", LocalDateTime.now().minusHours(1), null), // null 입력
+                    StoryDetailResponse(10, "https://dummy.com/friend1.jpg", LocalDateTime.now().minusHours(1), null),
                     StoryDetailResponse(11, "https://dummy.com/friend2.jpg", LocalDateTime.now().minusMinutes(30), null),
                 )
             return ApiResponse.onSuccess(otherStories)
-        }
-
-        // 2. 내 스토리를 보는 경우 viewCount != null
-        else {
+        } else {
+            // 2. 내 스토리를 보는 경우 viewCount != null
             val myStories =
                 listOf(
                     StoryDetailResponse(20, "https://dummy.com/my1.jpg", LocalDateTime.now().minusHours(2), 52),
