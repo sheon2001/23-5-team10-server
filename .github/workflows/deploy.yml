@@ -52,8 +52,11 @@ jobs:
             # 기존에 실행 중인 자바 끄기 (없으면 패스)
             pgrep -f java | xargs -r kill -9
             
+            # 메모리 반환 10초 대기
+            sleep 10
+            
             # 새 파일이 있는 곳으로 이동
             cd /home/ubuntu/app
             
-            # 실행 (로그는 nohup.out에 저장)
-            nohup java -jar *.jar > nohup.out 2>&1 &
+            # 실행 (로그는 nohup.out에 저장. 메모리 제한 400MB)
+            nohup java -Xmx400m -jar *.jar > nohup.out 2>&1 &
