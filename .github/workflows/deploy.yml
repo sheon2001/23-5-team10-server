@@ -9,7 +9,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     if: github.repository == 'wafflestudio/23-5-team10-server'
-    
+
     steps:
       # 1. 코드 가져오기
       - name: Checkout code
