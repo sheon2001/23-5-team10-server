@@ -30,18 +30,29 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bootJar -x test
 
-      # 5. EC2로 파일 전송
+      # 5. 기존 파일 지우기 (SCP 전송 전에 청소)
+      - name: Clean up old jars
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: 22
+          script: rm -rf /home/ubuntu/app/*.jar
+
+      # 6. 새 파일 전송
       - name: Transfer Jar to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
+          port: 22
           source: "./build/libs/*.jar"
           target: "/home/ubuntu/app"
-          strip_components: 2 # 경로 떼고 파일만 옮기기
+          strip_components: 2
 
-      # 6. EC2 접속해서 실행
+      # 7. 배포 스크립트 실행
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -51,17 +62,4 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 20m
-          script: |
-            # 기존에 실행 중인 자바 끄기 (없으면 패스)
-            pgrep -f java | xargs -r kill -9 || true
-            
-            # 메모리 반환 10초 대기
-            sleep 10
-            
-            # 새 파일이 있는 곳으로 이동
-            cd /home/ubuntu/app
-            
-            # 실행 (로그는 nohup.out에 저장. 메모리 제한 400MB)
-            nohup java -Xmx400m -jar *.jar > nohup.out 2>&1 &
-            
-            sleep 2
+          script: /home/ubuntu/deploy.sh
