@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class HealthController {
-
     @GetMapping("/api/v1/health")
-    fun healthCheck(): ApiResponse<String> {
-        return ApiResponse.onSuccess("I'm alive!")
-    }
+    fun healthCheck(): ApiResponse<String> = ApiResponse.onSuccess("I'm alive!")
 }
