@@ -13,6 +13,7 @@ enum class ErrorCode(
 
     // 유저 관련 에러 (예시)
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_404", "존재하지 않는 회원입니다."),
+    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "USER_401", "비밀번호가 일치하지 않습니다."),
 
     // 게시글 관련 에러 (예시)
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_404", "게시글을 찾을 수 없습니다."),
