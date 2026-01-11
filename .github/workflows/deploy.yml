@@ -48,6 +48,9 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 20m
           script: |
             # 기존에 실행 중인 자바 끄기 (없으면 패스)
             pgrep -f java | xargs -r kill -9
@@ -60,3 +63,5 @@ jobs:
             
             # 실행 (로그는 nohup.out에 저장. 메모리 제한 400MB)
             nohup java -Xmx400m -jar *.jar > nohup.out 2>&1 &
+            
+            sleep 2
