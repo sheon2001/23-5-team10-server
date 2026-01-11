@@ -23,6 +23,13 @@ class SecurityConfig {
             .authorizeHttpRequests {
                 // Actuator health check
                 it.requestMatchers("/actuator/health").permitAll()
+                // Swagger
+                it
+                    .requestMatchers(
+                        "/v3/api-docs/**", // API 명세 데이터
+                        "/swagger-ui/**", // UI 화면 리소스
+                        "/swagger-ui.html", // UI 메인 페이지
+                    ).permitAll()
                 it.anyRequest().permitAll()
             } // 현재 모든 요청 허용
 
