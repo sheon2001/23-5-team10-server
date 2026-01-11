@@ -51,6 +51,9 @@ dependencies {
 
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+
+    // Spring Boot Actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 kotlin {
