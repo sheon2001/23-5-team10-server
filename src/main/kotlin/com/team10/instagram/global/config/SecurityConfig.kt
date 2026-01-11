@@ -20,7 +20,11 @@ class SecurityConfig {
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
-            .authorizeHttpRequests { it.anyRequest().permitAll() } // 현재 모든 요청 허용
+            .authorizeHttpRequests {
+                // Actuator health check
+                it.requestMatchers("/actuator/health").permitAll()
+                it.anyRequest().permitAll()
+            } // 현재 모든 요청 허용
 
         return http.build()
     }
