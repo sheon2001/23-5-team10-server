@@ -6,6 +6,7 @@ import com.team10.instagram.domain.album.dto.AlbumPostDto
 import com.team10.instagram.domain.album.dto.AlbumResponse
 import com.team10.instagram.global.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -17,15 +18,18 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/albums")
+@Tag(name = "Album API", description = "앨범 관련 API")
 class AlbumController {
     // 1. 앨범 생성
     @PostMapping
+    @Operation(summary = "앨범 생성", description = "앨범을 생성합니다.")
     fun createAlbum(
         @RequestBody request: AlbumCreateRequest,
     ): ApiResponse<Long> = ApiResponse.onSuccess(100L)
 
     // 2. 내 앨범 목록 조회
     @GetMapping("/my")
+    @Operation(summary = "내 앨범 목록 조회", description = "내 앨범의 목록을 조회합니다.")
     fun getMyAlbums(): ApiResponse<List<AlbumResponse>> {
         val mockAlbums =
             listOf(
@@ -37,6 +41,7 @@ class AlbumController {
 
     // 3. 앨범 상세 조회 (게시글 목록)
     @GetMapping("/{albumId}")
+    @Operation(summary = "앨범 상세 조회", description = "해당 앨범에 포함된 게시글 목록을 조회합니다.")
     fun getAlbumDetail(
         @PathVariable albumId: Long,
     ): ApiResponse<AlbumDetailResponse> {
@@ -63,6 +68,7 @@ class AlbumController {
 
     // 5. 앨범 수정 (제목 변경 등)
     @PatchMapping("/{albumId}")
+    @Operation(summary = "앨범 수정", description = "앨범의 제목을 수정합니다.")
     fun updateAlbum(
         @PathVariable albumId: Long,
         @RequestBody request: AlbumCreateRequest,
@@ -74,6 +80,7 @@ class AlbumController {
 
     // 6. 앨범 삭제
     @DeleteMapping("/{albumId}")
+    @Operation(summary = "앨범 삭제", description = "해당 앨범을 삭제합니다..")
     fun deleteAlbum(
         @PathVariable albumId: Long,
     ): ApiResponse<Unit> {
