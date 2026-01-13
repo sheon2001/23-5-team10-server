@@ -10,7 +10,7 @@ import com.team10.instagram.domain.user.Role
 @Table("users")
 class User(
 
-    @Id val id: Long = 0L,
+    @Id val userId: Long = 0L,
     val email: String,
     var password: String? = null,
     var nickname: String,

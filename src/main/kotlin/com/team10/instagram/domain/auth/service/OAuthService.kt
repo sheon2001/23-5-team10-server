@@ -1,11 +1,10 @@
-package com.instagram.clone.domain.auth.service
+/*package com.team10.instagram.domain.auth.service
 
-import com.instagram.clone.domain.user.domain.Provider
-import com.instagram.clone.domain.user.domain.User
-import com.instagram.clone.domain.user.repository.UserRepository
-import com.instagram.clone.global.error.CustomException
-import com.instagram.clone.global.error.ErrorCode
-import com.instagram.clone.global.security.JwtTokenProvider
+import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
+import com.team10.instagram.domain.user.model.User
+import com.team10.instagram.domain.user.repository.UserRepository
+import com.team10.instagram.global.error.CustomException
+import com.team10.instagram.global.error.ErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -51,3 +50,4 @@ class OAuthService(
         return jwtTokenProvider.createToken(user.id, user.role.name)
     }
 }
+*/

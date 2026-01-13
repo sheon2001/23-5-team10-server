@@ -1,5 +1,6 @@
 package com.team10.instagram.domain.auth.jwt
 
+import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -11,7 +12,7 @@ import java.util.Date
 class JwtTokenProvider(
     @Value("\${jwt.secret}")
     private val secretKey: String,
-    @Value("\${jwt.expiration-in-ms}")
+    @Value("\${jwt.access-token-expiration-in-ms}")
     private val expirationInMs: Long,
 ) {
     private val key = Keys.hmacShaKeyFor(secretKey.toByteArray())
@@ -39,17 +40,18 @@ class JwtTokenProvider(
             .subject
             .toLong()
 
-    fun validateToken(token: String): Boolean {
-        try {
+    fun validateToken(token: String, jwtTokenBlacklistService: JwtTokenBlacklistService): Boolean {
+        if(jwtTokenBlacklistService.contains(token)) return false
+
+        return try {
             Jwts
                 .parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-            return true
+            true
         } catch (e: Exception) {
-            // do nothing
+            false
         }
-        return false
     }
 }

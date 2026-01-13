@@ -3,7 +3,7 @@ package com.team10.instagram.domain.user.dto
 import com.team10.instagram.domain.user.model.User
 
 data class UserDto(
-    val id: Long,
+    val userId: Long,
     val email: String,
     val nickname: String,
     val profileImageUrl: String?,
@@ -11,7 +11,7 @@ data class UserDto(
     val role: String,
 ) {
     constructor(user: User) : this(
-        id = user.id,
+        userId = user.userId,
         email = user.email,
         nickname = user.nickname,
         profileImageUrl = user.profileImageUrl,

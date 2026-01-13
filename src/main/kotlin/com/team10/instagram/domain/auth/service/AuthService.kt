@@ -50,7 +50,7 @@ class AuthService(
             throw CustomException(ErrorCode.INVALID_PASSWORD)
         }
 
-        return jwtTokenProvider.createToken(user.id!!)
+        return jwtTokenProvider.createToken(user.userId!!)
     }
 
     private fun findUserByLoginId(loginId: String): User? {
@@ -81,6 +81,6 @@ class AuthService(
                 )
             )
 
-        return jwtTokenProvider.createToken(user.id!!)
+        return jwtTokenProvider.createToken(user.userId!!)
     }
 }

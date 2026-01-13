@@ -24,6 +24,6 @@ class UserArgumentResolver(
     ): User? =
         runCatching {
             val userId = webRequest.getAttribute("userId", 0) as Long
-            userRepository.findById(userId).orElse(null)
+            userRepository.findByUserId(userId)
         }.getOrNull()
 }
