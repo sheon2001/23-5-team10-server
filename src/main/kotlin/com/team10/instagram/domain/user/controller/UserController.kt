@@ -1,0 +1,55 @@
+package com.team10.instagram.domain.user.controller
+
+import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
+import com.team10.instagram.domain.user.LoggedInUser
+import com.team10.instagram.domain.user.dto.UserDto
+import com.team10.instagram.domain.user.model.User
+import com.team10.instagram.domain.user.service.UserService
+import com.team10.instagram.global.common.ApiResponse
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/api/v1/users")
+@Tag(name = "User", description = "사용자 API")
+class UserController(
+    private val userService: UserService,
+    private val jwtTokenBlacklistService: JwtTokenBlacklistService
+) {
+    @Operation(summary = "본인 정보 조회", description = "로그인한 사용자의 정보를 조회합니다")
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode="200", description = "사용자 정보 조회 성공"),
+            SwaggerApiResponse(responseCode = "401", description = "인증 실패 (유효하지 않은 토큰)"),
+        ],
+    )
+    @GetMapping("/me")
+    fun me(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+    ): ApiResponse<UserDto> {
+        return ApiResponse.onSuccess(UserDto(user))
+    }
+
+
+    @DeleteMapping("/me")
+    fun deleteUser(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): ApiResponse<String> {
+        val token = authorizationHeader.replace("Bearer","").trim()
+
+        userService.deleteUser(user.userId)
+        jwtTokenBlacklistService.add(token)
+
+        return ApiResponse.onSuccess("Account deleted successfully")
+    }
+}
