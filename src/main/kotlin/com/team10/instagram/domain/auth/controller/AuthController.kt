@@ -8,6 +8,9 @@ import com.team10.instagram.domain.auth.dto.OAuthLoginRequest
 import com.team10.instagram.domain.auth.service.AuthService
 import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
 import com.team10.instagram.global.common.ApiResponse
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,13 +20,27 @@ class AuthController(
     private val jwtTokenBlacklistService: JwtTokenBlacklistService
 ) {
 
+    @Operation(summary = "로그인", description = "이메일 또는 닉네임과 비밀번호로 로그인합니다")
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode = "200", description = "로그인 성공"),
+            SwaggerApiResponse(responseCode = "401", description = "비밀번호가 틀린 경우"),
+            SwaggerApiResponse(responseCode = "404", description = "사용자를 찾을 수 없는 경우"),
+        ]
+    )
     @PostMapping("/login")
     fun login(@RequestBody request: LoginRequest): ApiResponse<LoginResponse> {
         val token = authService.login(request.loginId, request.password)
         return ApiResponse.onSuccess(LoginResponse(token))
     }
 
-
+    @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임으로 회원가입 후 자동 로그인")
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode = "200", description = "회원가입 및 로그인 성공"),
+            SwaggerApiResponse(responseCode = "400", description = "이미 존재하는 이메일/닉네임"),
+        ]
+    )
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): ApiResponse<RegisterResponse> {
         val user = authService.register(request.email, request.password, request.nickname)
@@ -32,6 +49,12 @@ class AuthController(
         return ApiResponse.onSuccess(RegisterResponse(accessToken = token, user = user,))
     }
 
+    @Operation(summary = "로그아웃", description = "현재 JWT Access Token을 무효화합니다")
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
+        ]
+    )
     @PostMapping("/logout")
     fun logout(@RequestHeader("Authorization") authorizationHeader: String): ApiResponse<String> {
         val token = authorizationHeader.replace("Bearer","").trim()
@@ -41,7 +64,7 @@ class AuthController(
         return ApiResponse.onSuccess("Logged out successfully")
     }
 
-
+    //TODO
     @PostMapping("/oauth")
     fun oauthLogin(@RequestBody request: OAuthLoginRequest): ApiResponse<LoginResponse> {
         val token = authService.loginOAuth(

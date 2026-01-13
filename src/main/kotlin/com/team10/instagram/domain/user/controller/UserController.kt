@@ -39,7 +39,16 @@ class UserController(
         return ApiResponse.onSuccess(UserDto(user))
     }
 
-
+    @Operation(
+        summary = "회원 탈퇴",
+        description = "로그인한 사용자의 계정을 삭제하고, 현재 JWT Access Token을 무효화합니다"
+    )
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
+            SwaggerApiResponse(responseCode = "401", description = "인증 실패 (유효하지 않은 토큰)"),
+        ]
+    )
     @DeleteMapping("/me")
     fun deleteUser(
         @Parameter(hidden = true) @LoggedInUser user: User,
