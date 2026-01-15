@@ -16,4 +16,7 @@ enum class ErrorCode(
 
     // 게시글 관련 에러 (예시)
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_404", "게시글을 찾을 수 없습니다."),
+
+    // 팔로우 관련 에러
+    SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "FOLLOW_400_1", "자기 자신은 팔로우할 수 없습니다."),
 }
