@@ -1,7 +1,7 @@
 package com.team10.instagram.domain.user.dto
 
-import io.swagger.v3.oas.annotations.media.Schema
 import com.team10.instagram.domain.user.model.User
+import io.swagger.v3.oas.annotations.media.Schema
 
 data class UserDto(
     @Schema(description = "사용자 식별을 위한 아이디", example = "1")
@@ -23,6 +23,6 @@ data class UserDto(
         nickname = user.nickname,
         profileImageUrl = user.profileImageUrl,
         bio = user.bio,
-        role = user.role.name
+        role = user.role.name,
     )
 }

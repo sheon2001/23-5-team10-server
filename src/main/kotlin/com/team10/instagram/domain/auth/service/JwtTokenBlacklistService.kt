@@ -10,7 +10,5 @@ class JwtTokenBlacklistService {
         blacklist.add(token)
     }
 
-    fun contains(token: String) : Boolean {
-        return blacklist.contains(token)
-    }
+    fun contains(token: String): Boolean = blacklist.contains(token)
 }

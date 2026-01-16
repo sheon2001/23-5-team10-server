@@ -1,27 +1,23 @@
-/*package com.team10.instagram.domain.auth.service
+package com.team10.instagram.domain.auth.service
 
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
-import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
-import com.team10.instagram.global.error.CustomException
-import com.team10.instagram.global.error.ErrorCode
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OAuthService(
     private val userRepository: UserRepository,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
-
+/*
     /**
-     * Facebook OAuth 로그인 또는 회원가입
-     *
-     * @param email OAuth 제공자가 전달한 이메일
-     * @param name OAuth 제공자가 전달한 이름
-     * @param providerId OAuth 제공자가 발급한 고유 ID
-     * @return JWT Access Token
-     */
+ * Facebook OAuth 로그인 또는 회원가입
+ *
+ * @param email OAuth 제공자가 전달한 이메일
+ * @param name OAuth 제공자가 전달한 이름
+ * @param providerId OAuth 제공자가 발급한 고유 ID
+ * @return JWT Access Token
+ */
     @Transactional
     fun loginOrRegister(
         email: String,
@@ -48,6 +44,5 @@ class OAuthService(
 
         // JWT Access Token 발급
         return jwtTokenProvider.createToken(user.id, user.role.name)
-    }
+    }*/
 }
-*/

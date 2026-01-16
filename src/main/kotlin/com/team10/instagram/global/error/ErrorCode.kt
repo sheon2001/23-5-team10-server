@@ -17,4 +17,7 @@ enum class ErrorCode(
 
     // 게시글 관련 에러 (예시)
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "게시글을 찾을 수 없습니다."),
+
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "409", "이미 가입된 이메일입니다."),
+    NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "409", "이미 가입된 닉네임입니다."),
 }

@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
     private val jwtTokenBlacklistService: JwtTokenBlacklistService,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
     private val pathMatcher = AntPathMatcher()
 
@@ -25,9 +25,9 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        //println("JwtAuthenticationFilter called")
+        // println("JwtAuthenticationFilter called")
         if (isPublicPath(request.requestURI)) {
-            //println("is Public Path")
+            // println("is Public Path")
             filterChain.doFilter(request, response)
             return
         }
@@ -37,18 +37,19 @@ class JwtAuthenticationFilter(
         if (token != null && jwtTokenProvider.validateToken(token, jwtTokenBlacklistService)) {
             val userId = jwtTokenProvider.getUserId(token)
             request.setAttribute("userId", userId)
-            //println("Set userId in request: $userId")
+            // println("Set userId in request: $userId")
             val user = userRepository.findById(userId).orElse(null)
             if (user != null) {
-                val auth = UsernamePasswordAuthenticationToken(
-                    user,
-                    null,
-                    listOf(SimpleGrantedAuthority(user.role.name))
-                )
+                val auth =
+                    UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        listOf(SimpleGrantedAuthority(user.role.name)),
+                    )
                 SecurityContextHolder.getContext().authentication = auth
             }
         } else {
-            //println("Token is invalid")
+            // println("Token is invalid")
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing token")
             return
         }
@@ -66,6 +67,6 @@ class JwtAuthenticationFilter(
 
     private fun isPublicPath(path: String): Boolean =
         pathMatcher.match("/api/v1/auth/**", path) ||
-                pathMatcher.match("/swagger-ui/**", path) ||
-                pathMatcher.match("/v3/api-docs/**", path)
+            pathMatcher.match("/swagger-ui/**", path) ||
+            pathMatcher.match("/v3/api-docs/**", path)
 }

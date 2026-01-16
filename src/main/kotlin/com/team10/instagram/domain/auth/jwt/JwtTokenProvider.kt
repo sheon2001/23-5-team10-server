@@ -40,8 +40,11 @@ class JwtTokenProvider(
             .subject
             .toLong()
 
-    fun validateToken(token: String, jwtTokenBlacklistService: JwtTokenBlacklistService): Boolean {
-        if(jwtTokenBlacklistService.contains(token)) return false
+    fun validateToken(
+        token: String,
+        jwtTokenBlacklistService: JwtTokenBlacklistService,
+    ): Boolean {
+        if (jwtTokenBlacklistService.contains(token)) return false
 
         return try {
             Jwts
