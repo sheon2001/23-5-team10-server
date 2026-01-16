@@ -37,7 +37,6 @@ class AuthService(
             throw CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS)
         }
 
-
         userRepository.save(
             User(
                 email = email,
@@ -61,7 +60,7 @@ class AuthService(
         if (!passwordEncoder.matches(password, user.password)) {
             throw CustomException(ErrorCode.INVALID_PASSWORD)
         }
-        //1개의 기기에서만 로그인 가능하도록 설정 -> 추후 수정 가능
+        // 1개의 기기에서만 로그인 가능하도록 설정 -> 추후 수정 가능
         refreshTokenRepository.deleteByUserId(user.userId!!)
         val accessToken = jwtTokenProvider.createAccessToken(user.userId!!)
         val refreshToken = jwtTokenProvider.createRefreshToken(user.userId!!)
@@ -69,11 +68,13 @@ class AuthService(
             RefreshToken(
                 userId = user.userId!!,
                 token = refreshToken,
-                expiresAt = jwtTokenProvider.getExpiration(refreshToken)
-                    .toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime(),
-            )
+                expiresAt =
+                    jwtTokenProvider
+                        .getExpiration(refreshToken)
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+            ),
         )
 
         return LoginResponse(accessToken, refreshToken)
@@ -84,13 +85,13 @@ class AuthService(
             refreshTokenRepository.findByToken(refreshToken)
                 ?: throw CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
 
-        if(savedToken.usedAt != null) {
-            //해당 유저 모든 토큰 폐기
+        if (savedToken.usedAt != null) {
+            // 해당 유저 모든 토큰 폐기
             refreshTokenRepository.deleteByUserId(savedToken.userId)
             throw CustomException(ErrorCode.REFRESH_TOKEN_REUSE_DETECTED)
         }
 
-        if(jwtTokenProvider.isExpired(refreshToken)) {
+        if (jwtTokenProvider.isExpired(refreshToken)) {
             refreshTokenRepository.delete(savedToken)
             throw CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED)
         }
@@ -104,11 +105,13 @@ class AuthService(
             RefreshToken(
                 userId = savedToken.userId,
                 token = newRefreshToken,
-                expiresAt = jwtTokenProvider.getExpiration(newRefreshToken)
-                    .toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime(),
-            )
+                expiresAt =
+                    jwtTokenProvider
+                        .getExpiration(newRefreshToken)
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+            ),
         )
 
         return RefreshResponse(newAccessToken, newRefreshToken)

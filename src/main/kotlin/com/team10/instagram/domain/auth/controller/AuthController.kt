@@ -1,10 +1,10 @@
 package com.team10.instagram.domain.auth.controller
 
-import com.team10.instagram.domain.auth.dto.AuthRequest.RefreshRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.LoginRequest
+import com.team10.instagram.domain.auth.dto.AuthRequest.RefreshRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RegisterRequest
-import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
+import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RegisterResponse
 import com.team10.instagram.domain.auth.service.AuthService
 import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
@@ -61,7 +61,7 @@ class AuthController(
     fun refresh(
         @Valid @RequestBody request: RefreshRequest,
     ): ApiResponse<RefreshResponse> {
-        val refreshResponse  = authService.refresh(request.refreshToken)
+        val refreshResponse = authService.refresh(request.refreshToken)
         return ApiResponse.onSuccess(refreshResponse)
     }
 
@@ -79,9 +79,8 @@ class AuthController(
         authService.logout(accessToken)
         return ApiResponse.onSuccess("Logged out successfully")
     }
-
+/*
     // TODO
-    /*
     @PostMapping("/oauth")
     fun oauthLogin(
         @RequestBody request: OAuthLoginRequest,
@@ -93,6 +92,6 @@ class AuthController(
                 provider = request.provider,
                 providerId = request.providerId,
             )
-        return ApiResponse.onSuccess(LoginResponse(token))
+        return ApiResponse.onSuccess(LoginResponse(token, token))
     }*/
 }

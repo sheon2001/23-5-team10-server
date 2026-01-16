@@ -218,89 +218,97 @@ class AuthIntegrationTest
             assert(jwtTokenBlacklistService.contains(token))
         }
 
-    @Test
-    fun `refresh access token with valid refresh token`() {
-        val loginRequest = LoginRequest(loginId = testUser.email, password = "password123")
-        val loginResult =
-            mockMvc.post("/api/v1/auth/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(loginRequest)
-            }.andReturn()
+        @Test
+        fun `refresh access token with valid refresh token`() {
+            val loginRequest = LoginRequest(loginId = testUser.email, password = "password123")
+            val loginResult =
+                mockMvc
+                    .post("/api/v1/auth/login") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsString(loginRequest)
+                    }.andReturn()
 
-        val refreshToken =
-            objectMapper.readTree(loginResult.response.contentAsString)
-                .get("data")
-                .get("refreshToken")
-                .asText()
+            val refreshToken =
+                objectMapper
+                    .readTree(loginResult.response.contentAsString)
+                    .get("data")
+                    .get("refreshToken")
+                    .asText()
 
-        val requestBody = mapOf("refreshToken" to refreshToken)
-        val refreshResult =
-            mockMvc.post("/api/v1/auth/refresh") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(requestBody)
-            }.andExpect { status { isOk() } }
-                .andReturn()
+            val requestBody = mapOf("refreshToken" to refreshToken)
+            val refreshResult =
+                mockMvc
+                    .post("/api/v1/auth/refresh") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsString(requestBody)
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
 
-        val newAccessToken =
-            objectMapper.readTree(refreshResult.response.contentAsString)
-                .get("data")
-                .get("accessToken")
-                .asText()
+            val newAccessToken =
+                objectMapper
+                    .readTree(refreshResult.response.contentAsString)
+                    .get("data")
+                    .get("accessToken")
+                    .asText()
 
-        assertNotNull(newAccessToken)
-        assert(newAccessToken.isNotBlank())
+            assertNotNull(newAccessToken)
+            assert(newAccessToken.isNotBlank())
+        }
+
+        @Test
+        fun `refresh access token with already used refresh token returns REFRESH_TOKEN_REUSE_DETECTED`() {
+            // 먼저 로그인해서 refresh token 발급
+            val loginRequest = LoginRequest(loginId = testUser.email, password = "password123")
+            val loginResult =
+                mockMvc
+                    .post("/api/v1/auth/login") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsString(loginRequest)
+                    }.andReturn()
+
+            val refreshToken =
+                objectMapper
+                    .readTree(loginResult.response.contentAsString)
+                    .get("data")
+                    .get("refreshToken")
+                    .asText()
+
+            val requestBody = mapOf("refreshToken" to refreshToken)
+
+            // 1차 요청: 정상 사용
+            mockMvc
+                .post("/api/v1/auth/refresh") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsString(requestBody)
+                }.andExpect { status { isOk() } }
+
+            // 2차 요청: 이미 사용됨
+            val secondResult =
+                mockMvc
+                    .post("/api/v1/auth/refresh") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsString(requestBody)
+                    }.andExpect { status { isUnauthorized() } }
+                    .andReturn()
+
+            val code = objectMapper.readTree(secondResult.response.contentAsString).get("code").asText()
+            assert(code == "401") // REFRESH_TOKEN_REUSE_DETECTED
+        }
+
+        @Test
+        fun `refresh access token with invalid refresh token returns INVALID_REFRESH_TOKEN`() {
+            val invalidToken = "nonexistent.token"
+            val requestBody = mapOf("refreshToken" to invalidToken)
+
+            val result =
+                mockMvc
+                    .post("/api/v1/auth/refresh") {
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsString(requestBody)
+                    }.andExpect { status { isUnauthorized() } }
+                    .andReturn()
+
+            val code = objectMapper.readTree(result.response.contentAsString).get("code").asText()
+            assert(code == "401") // INVALID_REFRESH_TOKEN
+        }
     }
-
-
-    @Test
-    fun `refresh access token with already used refresh token returns REFRESH_TOKEN_REUSE_DETECTED`() {
-        // 먼저 로그인해서 refresh token 발급
-        val loginRequest = LoginRequest(loginId = testUser.email, password = "password123")
-        val loginResult =
-            mockMvc.post("/api/v1/auth/login") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(loginRequest)
-            }.andReturn()
-
-        val refreshToken =
-            objectMapper.readTree(loginResult.response.contentAsString)
-                .get("data")
-                .get("refreshToken")
-                .asText()
-
-        val requestBody = mapOf("refreshToken" to refreshToken)
-
-        // 1차 요청: 정상 사용
-        mockMvc.post("/api/v1/auth/refresh") {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(requestBody)
-        }.andExpect { status { isOk() } }
-
-        // 2차 요청: 이미 사용됨
-        val secondResult =
-            mockMvc.post("/api/v1/auth/refresh") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(requestBody)
-            }.andExpect { status { isUnauthorized() } }
-                .andReturn()
-
-        val code = objectMapper.readTree(secondResult.response.contentAsString).get("code").asText()
-        assert(code == "401") // REFRESH_TOKEN_REUSE_DETECTED
-    }
-
-    @Test
-    fun `refresh access token with invalid refresh token returns INVALID_REFRESH_TOKEN`() {
-        val invalidToken = "nonexistent.token"
-        val requestBody = mapOf("refreshToken" to invalidToken)
-
-        val result =
-            mockMvc.post("/api/v1/auth/refresh") {
-                contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(requestBody)
-            }.andExpect { status { isUnauthorized() } }
-                .andReturn()
-
-        val code = objectMapper.readTree(result.response.contentAsString).get("code").asText()
-        assert(code == "401") // INVALID_REFRESH_TOKEN
-    }
-}

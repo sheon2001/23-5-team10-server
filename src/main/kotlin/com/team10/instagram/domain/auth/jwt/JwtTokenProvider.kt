@@ -20,36 +20,38 @@ class JwtTokenProvider(
 ) {
     private val key = Keys.hmacShaKeyFor(secretKey.toByteArray())
 
-    fun createAccessToken(userId: Long): String {
-        return createToken(
+    fun createAccessToken(userId: Long): String =
+        createToken(
             userId = userId,
             expiresIn = accessTokenExpirationInMs,
-            claims = mapOf("type" to "access")
+            claims = mapOf("type" to "access"),
         )
 
-    }
-
-    fun createRefreshToken(userId: Long): String {
-        return createToken(
+    fun createRefreshToken(userId: Long): String =
+        createToken(
             userId = userId,
             expiresIn = refreshTokenExpirationInMs,
-            claims = mapOf("type" to "refresh")
+            claims = mapOf("type" to "refresh"),
         )
-    }
 
-    private fun createToken(userId: Long, expiresIn: Long, claims: Map<String, Any>?): String {
+    private fun createToken(
+        userId: Long,
+        expiresIn: Long,
+        claims: Map<String, Any>?,
+    ): String {
         val now = Date()
         val validity = Date(now.time + expiresIn)
         val tokenClaims = claims.orEmpty() + mapOf("jti" to UUID.randomUUID().toString())
 
-        val token = Jwts
-            .builder()
-            .setSubject(userId.toString())
-            .addClaims(tokenClaims)
-            .setIssuedAt(now)
-            .setExpiration(validity)
-            .signWith(key, SignatureAlgorithm.HS256)
-            .compact()
+        val token =
+            Jwts
+                .builder()
+                .setSubject(userId.toString())
+                .addClaims(tokenClaims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact()
         println("Token Created: {$token}")
 
         return token
@@ -74,13 +76,12 @@ class JwtTokenProvider(
             .body
             .expiration
 
-    fun isExpired(token: String): Boolean {
-        return try {
+    fun isExpired(token: String): Boolean =
+        try {
             getExpiration(token).before(Date())
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             true
         }
-    }
 
     fun validateToken(
         token: String,
