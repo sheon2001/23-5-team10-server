@@ -57,6 +57,13 @@ class AuthController(
         return ApiResponse.onSuccess(RegisterResponse(accessToken = tokenPair.accessToken, refreshToken = tokenPair.refreshToken))
     }
 
+    @Operation(summary = "액세스 토큰 재발급", description = "재발급 토큰을 인증하여 액세스 토큰 재발급")
+    @ApiResponses(
+        value = [
+            SwaggerApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공"),
+            SwaggerApiResponse(responseCode = "401", description = "유효하지 않거나 만료되거나 이미 한 번 사용된 재발급 토큰"),
+        ],
+    )
     @PostMapping("/refresh")
     fun refresh(
         @Valid @RequestBody request: RefreshRequest,
