@@ -12,18 +12,13 @@ data class Comment(
     @Id
     @Column("comment_id")
     val id: Long? = null,
-
     @Column("post_id")
     val postId: Long,
-
     @Column("user_id")
     val userId: Long,
-
     val content: String,
-
     @CreatedDate
     val createdAt: LocalDateTime? = null,
-
     @LastModifiedDate
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
 )

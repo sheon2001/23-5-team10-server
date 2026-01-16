@@ -19,23 +19,26 @@ import java.time.LocalDateTime
 class CommentService(
     private val commentRepository: CommentRepository,
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
-
     @Transactional
-    fun create(user: User, postId: Long, request: CommentCreateRequest): CommentResponse {
+    fun create(
+        user: User,
+        postId: Long,
+        request: CommentCreateRequest,
+    ): CommentResponse {
         if (!postRepository.existsById(postId)) {
             throw CustomException(ErrorCode.POST_NOT_FOUND)
         }
 
-        val comment = Comment(
-            postId = postId,
-            userId = user.id!!,
-            content = request.content
-        )
+        val comment =
+            Comment(
+                postId = postId,
+                userId = user.id!!,
+                content = request.content,
+            )
 
         val savedComment = commentRepository.save(comment)
-        // DTO 변환을 위해 작성자(user) 정보가 필요함 (여기선 파라미터로 받은 user 사용)
         return convertToDto(savedComment, user)
     }
 
@@ -47,21 +50,25 @@ class CommentService(
 
         val comments = commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId)
         return comments.map { comment ->
-            // 댓글 작성자 정보 조회
-            val writer = userRepository.findByIdOrNull(comment.userId)
-                ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
+            val writer =
+                userRepository.findByIdOrNull(comment.userId)
+                    ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
             convertToDto(comment, writer)
         }
     }
 
     @Transactional
-    fun update(user: User, commentId: Long, request: CommentUpdateRequest): CommentResponse {
-        val comment = commentRepository.findByIdOrNull(commentId)
-            ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+    fun update(
+        user: User,
+        commentId: Long,
+        request: CommentUpdateRequest,
+    ): CommentResponse {
+        val comment =
+            commentRepository.findByIdOrNull(commentId)
+                ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         if (comment.userId != user.id) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
-        // JDBC Update: copy 후 save
         val updatedComment = comment.copy(content = request.content)
         val saved = commentRepository.save(updatedComment)
 
@@ -69,17 +76,24 @@ class CommentService(
     }
 
     @Transactional
-    fun delete(user: User, commentId: Long) {
-        val comment = commentRepository.findByIdOrNull(commentId)
-            ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+    fun delete(
+        user: User,
+        commentId: Long,
+    ) {
+        val comment =
+            commentRepository.findByIdOrNull(commentId)
+                ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         if (comment.userId != user.id) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         commentRepository.delete(comment)
     }
 
-    private fun convertToDto(comment: Comment, writer: User): CommentResponse {
-        return CommentResponse(
+    private fun convertToDto(
+        comment: Comment,
+        writer: User,
+    ): CommentResponse =
+        CommentResponse(
             id = comment.id!!,
             postId = comment.postId,
             userId = writer.id!!,
@@ -87,7 +101,6 @@ class CommentService(
             profileImageUrl = writer.profileImageUrl,
             content = comment.content,
             createdAt = comment.createdAt ?: LocalDateTime.now(),
-            updatedAt = comment.updatedAt ?: LocalDateTime.now()
+            updatedAt = comment.updatedAt ?: LocalDateTime.now(),
         )
-    }
 }
