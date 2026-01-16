@@ -43,6 +43,6 @@ class OAuthService(
         }
 
         // JWT Access Token 발급
-        return jwtTokenProvider.createToken(user.id, user.role.name)
+        return jwtTokenProvider.createAccessToken(user.id, user.role.name)
     }*/
 }

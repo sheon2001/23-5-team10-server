@@ -36,7 +36,6 @@ class AuthRequest {
     )
 
     data class RefreshRequest(
-        // TODO
         val refreshToken: String,
     )
 }

@@ -1,8 +1,11 @@
 package com.team10.instagram.domain.auth.service
 
+import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
+import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
+import com.team10.instagram.domain.auth.model.RefreshToken
+import com.team10.instagram.domain.auth.repository.RefreshTokenRepository
 import com.team10.instagram.domain.user.Role
-import com.team10.instagram.domain.user.dto.UserDto
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import com.team10.instagram.global.error.CustomException
@@ -10,6 +13,8 @@ import com.team10.instagram.global.error.ErrorCode
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 @Transactional
@@ -17,12 +22,14 @@ class AuthService(
     private val userRepository: UserRepository,
     private val jwtTokenProvider: JwtTokenProvider,
     private val passwordEncoder: PasswordEncoder,
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val jwtTokenBlacklistService: JwtTokenBlacklistService,
 ) {
     fun register(
         email: String,
         password: String,
         nickname: String,
-    ): UserDto {
+    ) {
         if (userRepository.existsByEmail(email)) {
             throw CustomException(ErrorCode.EMAIL_ALREADY_EXISTS)
         }
@@ -30,27 +37,23 @@ class AuthService(
             throw CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS)
         }
 
-        val encodedPassword = passwordEncoder.encode(password)
 
-        val user =
-            userRepository.save(
-                User(
-                    email = email,
-                    password = encodedPassword,
-                    nickname = nickname,
-                    role = Role.USER,
-                    provider = null,
-                    providerId = null,
-                ),
-            )
-
-        return UserDto(user)
+        userRepository.save(
+            User(
+                email = email,
+                password = passwordEncoder.encode(password),
+                nickname = nickname,
+                role = Role.USER,
+                provider = null,
+                providerId = null,
+            ),
+        )
     }
 
     fun login(
         loginId: String,
         password: String,
-    ): String {
+    ): LoginResponse {
         val user =
             findUserByLoginId(loginId)
                 ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
@@ -58,8 +61,57 @@ class AuthService(
         if (!passwordEncoder.matches(password, user.password)) {
             throw CustomException(ErrorCode.INVALID_PASSWORD)
         }
+        //1개의 기기에서만 로그인 가능하도록 설정 -> 추후 수정 가능
+        refreshTokenRepository.deleteByUserId(user.userId!!)
+        val accessToken = jwtTokenProvider.createAccessToken(user.userId!!)
+        val refreshToken = jwtTokenProvider.createRefreshToken(user.userId!!)
+        refreshTokenRepository.save(
+            RefreshToken(
+                userId = user.userId!!,
+                token = refreshToken,
+                expiresAt = jwtTokenProvider.getExpiration(refreshToken)
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime(),
+            )
+        )
 
-        return jwtTokenProvider.createToken(user.userId!!)
+        return LoginResponse(accessToken, refreshToken)
+    }
+
+    fun refresh(refreshToken: String): RefreshResponse {
+        val savedToken =
+            refreshTokenRepository.findByToken(refreshToken)
+                ?: throw CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
+
+        if(savedToken.usedAt != null) {
+            //해당 유저 모든 토큰 폐기
+            refreshTokenRepository.deleteByUserId(savedToken.userId)
+            throw CustomException(ErrorCode.REFRESH_TOKEN_REUSE_DETECTED)
+        }
+
+        if(jwtTokenProvider.isExpired(refreshToken)) {
+            refreshTokenRepository.delete(savedToken)
+            throw CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED)
+        }
+
+        savedToken.usedAt = LocalDateTime.now()
+        refreshTokenRepository.save(savedToken)
+
+        val newAccessToken = jwtTokenProvider.createAccessToken(savedToken.userId)
+        val newRefreshToken = jwtTokenProvider.createRefreshToken(savedToken.userId)
+        refreshTokenRepository.save(
+            RefreshToken(
+                userId = savedToken.userId,
+                token = newRefreshToken,
+                expiresAt = jwtTokenProvider.getExpiration(newRefreshToken)
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime(),
+            )
+        )
+
+        return RefreshResponse(newAccessToken, newRefreshToken)
     }
 
     private fun findUserByLoginId(loginId: String): User? =
@@ -68,6 +120,12 @@ class AuthService(
         } else {
             userRepository.findByNickname(loginId)
         }
+
+    fun logout(accessToken: String) {
+        jwtTokenBlacklistService.add(accessToken)
+        val userId = jwtTokenProvider.getUserId(accessToken)
+        refreshTokenRepository.deleteByUserId(userId)
+    }
 
     fun loginOAuth(
         email: String,
@@ -88,6 +146,6 @@ class AuthService(
                     ),
                 )
 
-        return jwtTokenProvider.createToken(user.userId!!)
+        return jwtTokenProvider.createAccessToken(user.userId!!)
     }
 }

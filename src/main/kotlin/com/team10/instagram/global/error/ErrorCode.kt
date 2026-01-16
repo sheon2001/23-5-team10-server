@@ -20,4 +20,8 @@ enum class ErrorCode(
 
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "409", "이미 가입된 이메일입니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "409", "이미 가입된 닉네임입니다."),
+
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "401", "인증 정보가 유효하지 않습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "401", "인증 정보가 만료되었습니다."),
+    REFRESH_TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "401", "재발급 토큰이 재사용되었습니다."),
 }

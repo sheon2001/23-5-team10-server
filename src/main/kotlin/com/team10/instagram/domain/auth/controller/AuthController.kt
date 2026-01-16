@@ -1,8 +1,9 @@
 package com.team10.instagram.domain.auth.controller
 
+import com.team10.instagram.domain.auth.dto.AuthRequest.RefreshRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.LoginRequest
-import com.team10.instagram.domain.auth.dto.AuthRequest.OAuthLoginRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RegisterRequest
+import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RegisterResponse
 import com.team10.instagram.domain.auth.service.AuthService
@@ -36,8 +37,8 @@ class AuthController(
     fun login(
         @Valid @RequestBody request: LoginRequest,
     ): ApiResponse<LoginResponse> {
-        val token = authService.login(request.loginId, request.password)
-        return ApiResponse.onSuccess(LoginResponse(token))
+        val tokenPair = authService.login(request.loginId, request.password)
+        return ApiResponse.onSuccess(tokenPair)
     }
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임으로 회원가입 후 자동 로그인")
@@ -51,10 +52,17 @@ class AuthController(
     fun register(
         @Valid @RequestBody request: RegisterRequest,
     ): ApiResponse<RegisterResponse> {
-        val user = authService.register(request.email, request.password, request.nickname)
-        val token = authService.login(request.email, request.password)
+        authService.register(request.email, request.password, request.nickname)
+        val tokenPair = authService.login(request.email, request.password)
+        return ApiResponse.onSuccess(RegisterResponse(accessToken = tokenPair.accessToken, refreshToken = tokenPair.refreshToken))
+    }
 
-        return ApiResponse.onSuccess(RegisterResponse(accessToken = token, user = user))
+    @PostMapping("/refresh")
+    fun refresh(
+        @Valid @RequestBody request: RefreshRequest,
+    ): ApiResponse<RefreshResponse> {
+        val refreshResponse  = authService.refresh(request.refreshToken)
+        return ApiResponse.onSuccess(refreshResponse)
     }
 
     @Operation(summary = "로그아웃", description = "현재 JWT Access Token을 무효화합니다")
@@ -67,14 +75,13 @@ class AuthController(
     fun logout(
         @RequestHeader("Authorization") authorizationHeader: String,
     ): ApiResponse<String> {
-        val token = authorizationHeader.replace("Bearer", "").trim()
-
-        jwtTokenBlacklistService.add(token)
-
+        val accessToken = authorizationHeader.replace("Bearer", "").trim()
+        authService.logout(accessToken)
         return ApiResponse.onSuccess("Logged out successfully")
     }
 
     // TODO
+    /*
     @PostMapping("/oauth")
     fun oauthLogin(
         @RequestBody request: OAuthLoginRequest,
@@ -87,5 +94,5 @@ class AuthController(
                 providerId = request.providerId,
             )
         return ApiResponse.onSuccess(LoginResponse(token))
-    }
+    }*/
 }

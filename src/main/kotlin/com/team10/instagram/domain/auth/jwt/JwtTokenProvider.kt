@@ -7,27 +7,52 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.Date
+import java.util.UUID
 
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}")
     private val secretKey: String,
     @Value("\${jwt.access-token-expiration-in-ms}")
-    private val expirationInMs: Long,
+    private val accessTokenExpirationInMs: Long,
+    @Value("\${jwt.refresh-token-expiration-in-ms}")
+    private val refreshTokenExpirationInMs: Long,
 ) {
     private val key = Keys.hmacShaKeyFor(secretKey.toByteArray())
 
-    fun createToken(userId: Long): String {
-        val now = Date()
-        val validity = Date(now.time + expirationInMs)
+    fun createAccessToken(userId: Long): String {
+        return createToken(
+            userId = userId,
+            expiresIn = accessTokenExpirationInMs,
+            claims = mapOf("type" to "access")
+        )
 
-        return Jwts
+    }
+
+    fun createRefreshToken(userId: Long): String {
+        return createToken(
+            userId = userId,
+            expiresIn = refreshTokenExpirationInMs,
+            claims = mapOf("type" to "refresh")
+        )
+    }
+
+    private fun createToken(userId: Long, expiresIn: Long, claims: Map<String, Any>?): String {
+        val now = Date()
+        val validity = Date(now.time + expiresIn)
+        val tokenClaims = claims.orEmpty() + mapOf("jti" to UUID.randomUUID().toString())
+
+        val token = Jwts
             .builder()
             .setSubject(userId.toString())
+            .addClaims(tokenClaims)
             .setIssuedAt(now)
             .setExpiration(validity)
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
+        println("Token Created: {$token}")
+
+        return token
     }
 
     fun getUserId(token: String): Long =
@@ -39,6 +64,23 @@ class JwtTokenProvider(
             .body
             .subject
             .toLong()
+
+    fun getExpiration(token: String): Date =
+        Jwts
+            .parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+            .body
+            .expiration
+
+    fun isExpired(token: String): Boolean {
+        return try {
+            getExpiration(token).before(Date())
+        } catch(e: Exception) {
+            true
+        }
+    }
 
     fun validateToken(
         token: String,
