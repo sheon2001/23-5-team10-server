@@ -60,6 +60,9 @@ dependencies {
 
     // Spring Boot Actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // AWS S3
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.1")
 }
 
 kotlin {

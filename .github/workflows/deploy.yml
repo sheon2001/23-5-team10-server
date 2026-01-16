@@ -29,6 +29,9 @@ jobs:
       # 4. 빌드 (테스트 제외)
       - name: Build with Gradle
         run: ./gradlew clean bootJar -x test
+        env:
+          SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
       # 5. 기존 파일 지우기 (SCP 전송 전에 청소)
       - name: Clean up old jars

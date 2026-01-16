@@ -16,6 +16,16 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  config:
+    import: optional:classpath:application-secret.yml
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      s3:
+        bucket: wafflestudio-team10-instagram-clone
+
 ### TODO : OAuth
 #  security:
 #    oauth2:

@@ -41,3 +41,6 @@ out/
 
 ### DB Data ###
 db_data/
+
+### Secret Config ###
+src/main/resources/application-secret.yml
