@@ -19,9 +19,9 @@ class ImageController(
     @Operation(summary = "이미지 업로드", description = "이미지 파일을 업로드하고, S3 URL을 반환받습니다.")
     @PostMapping("/upload", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadImage(
-        @RequestPart("image") image: MultipartFile,
-    ): ResponseEntity<String> {
-        val imageUrl = imageService.upload(image)
-        return ResponseEntity.ok(imageUrl)
+        @RequestPart("image") images: List<MultipartFile>,
+    ): ResponseEntity<List<String>> {
+        val imageUrls = imageService.upload(images)
+        return ResponseEntity.ok(imageUrls)
     }
 }
