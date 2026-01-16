@@ -34,7 +34,7 @@ class CommentService(
         val comment =
             Comment(
                 postId = postId,
-                userId = user.id!!,
+                userId = user.userId,
                 content = request.content,
             )
 
@@ -67,7 +67,7 @@ class CommentService(
             commentRepository.findByIdOrNull(commentId)
                 ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
-        if (comment.userId != user.id) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (comment.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         val updatedComment = comment.copy(content = request.content)
         val saved = commentRepository.save(updatedComment)
@@ -84,7 +84,7 @@ class CommentService(
             commentRepository.findByIdOrNull(commentId)
                 ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
-        if (comment.userId != user.id) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (comment.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         commentRepository.delete(comment)
     }
@@ -96,7 +96,7 @@ class CommentService(
         CommentResponse(
             id = comment.id!!,
             postId = comment.postId,
-            userId = writer.id!!,
+            userId = writer.userId,
             nickname = writer.nickname,
             profileImageUrl = writer.profileImageUrl,
             content = comment.content,
