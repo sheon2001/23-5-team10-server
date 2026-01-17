@@ -23,6 +23,7 @@ class JwtAuthenticationFilter(
     private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
     private val pathMatcher = AntPathMatcher()
+
     @Value("\${jwt.test-token}")
     private lateinit var testToken: String
 
@@ -38,28 +39,28 @@ class JwtAuthenticationFilter(
 
         val token = resolveToken(request)
 
-        if(token == testToken) {
-            val user = userRepository.findByEmail("test@swagger.com")
-                ?: userRepository.save(
-                User(
-                    email = "test@swagger.com",
-                    password = BCryptPasswordEncoder().encode("password123"),
-                    nickname = "swagger_tester",
-                    role = Role.USER,
-                )
-            )
+        if (token == testToken) {
+            val user =
+                userRepository.findByEmail("test@swagger.com")
+                    ?: userRepository.save(
+                        User(
+                            email = "test@swagger.com",
+                            password = BCryptPasswordEncoder().encode("password123"),
+                            nickname = "swagger_tester",
+                            role = Role.USER,
+                        ),
+                    )
             request.setAttribute("userId", user.userId)
             val auth =
                 UsernamePasswordAuthenticationToken(
                     user,
                     null,
-                    listOf(SimpleGrantedAuthority("ROLE_USER"))
+                    listOf(SimpleGrantedAuthority("ROLE_USER")),
                 )
             SecurityContextHolder.getContext().authentication = auth
-            filterChain.doFilter(request,response)
+            filterChain.doFilter(request, response)
             return
-        }
-        else if (token != null && jwtTokenProvider.validateToken(token, jwtTokenBlacklistService)) {
+        } else if (token != null && jwtTokenProvider.validateToken(token, jwtTokenBlacklistService)) {
             val userId = jwtTokenProvider.getUserId(token)
             request.setAttribute("userId", userId)
             val user = userRepository.findById(userId).orElse(null)

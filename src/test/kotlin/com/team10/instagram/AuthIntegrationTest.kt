@@ -47,7 +47,8 @@ class AuthIntegrationTest
                         nickname = "tester",
                         role = Role.USER,
                     ),
-                )}
+                )
+        }
 
         @Test
         fun `login with email returns JWT token`() {
