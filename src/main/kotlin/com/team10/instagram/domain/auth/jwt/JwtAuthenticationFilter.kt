@@ -92,5 +92,6 @@ class JwtAuthenticationFilter(
     private fun isPublicPath(path: String): Boolean =
         pathMatcher.match("/api/v1/auth/**", path) ||
             pathMatcher.match("/swagger-ui/**", path) ||
-            pathMatcher.match("/v3/api-docs/**", path)
+            pathMatcher.match("/v3/api-docs/**", path) ||
+                pathMatcher.match("/actuator/health", path)
 }
