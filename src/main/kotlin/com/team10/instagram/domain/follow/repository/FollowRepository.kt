@@ -43,11 +43,11 @@ class FollowRepository(
         loginUserId: Long,
     ): List<FollowResponse> {
         val sql = """
-            SELECT u.id, u.nickname, u.profile_image_url,
+            SELECT u.user_id, u.nickname, u.profile_image_url,
                    -- 내가 이 사람을 맞팔로우 하고 있는지 확인 (1이면 true, 0이면 false)
-                   EXISTS(SELECT 1 FROM follow f2 WHERE f2.from_user_id = ? AND f2.to_user_id = u.id) as is_following
+                   EXISTS(SELECT 1 FROM follow f2 WHERE f2.from_user_id = ? AND f2.to_user_id = u.user_id) as is_following
             FROM follow f
-            JOIN users u ON f.from_user_id = u.id
+            JOIN users u ON f.from_user_id = u.user_id
             WHERE f.to_user_id = ?
         """
 
@@ -60,11 +60,11 @@ class FollowRepository(
         loginUserId: Long,
     ): List<FollowResponse> {
         val sql = """
-            SELECT u.id, u.nickname, u.profile_image_url,
+            SELECT u.user_id, u.nickname, u.profile_image_url,
                    -- TODO() : 자기 자신일 경우 제외 로직 필요
                    true as is_following
             FROM follow f
-            JOIN users u ON f.to_user_id = u.id
+            JOIN users u ON f.to_user_id = u.user_id
             WHERE f.from_user_id = ?
         """
         return jdbcTemplate.query(sql, followRowMapper, targetUserId)

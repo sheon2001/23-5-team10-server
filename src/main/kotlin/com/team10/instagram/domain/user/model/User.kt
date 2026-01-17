@@ -8,8 +8,8 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 
 @Table("users")
-class User(
-    @Id val userId: Long = 0L,
+data class User(
+    @Id val userId: Long? = null,
     val email: String,
     var password: String? = null,
     var nickname: String,
