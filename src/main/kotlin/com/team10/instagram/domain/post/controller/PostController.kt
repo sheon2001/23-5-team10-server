@@ -6,6 +6,7 @@ import com.team10.instagram.domain.post.dto.PostImageResponse
 import com.team10.instagram.domain.post.dto.PostResponse
 import com.team10.instagram.domain.post.dto.PostUpdateRequest
 import com.team10.instagram.domain.post.dto.SearchResponse
+import com.team10.instagram.domain.post.service.PostService
 import com.team10.instagram.global.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -20,13 +21,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime // for mocking
 
-// removed for dummy output
-// import com.team10.instagram.domain.post.service.PostService
 @RestController
 @RequestMapping("/api/v1/posts")
 @Tag(name = "Post API", description = "게시글 관련 API")
 class PostController(
-    // private val postService: PostService,
+    private val postService: PostService,
 ) {
     private fun getDummyImages(): List<PostImageResponse> =
         listOf(
@@ -38,7 +37,7 @@ class PostController(
     // Assume image urls (for S3 buckets) are received
     // Actual image upload logic will implement at seperated controller.
     @PostMapping
-    @Operation(summary = "게시글 생성", description = "게시글을 작성합니다.") // [추가]
+    @Operation(summary = "게시글 생성", description = "게시글을 작성합니다.")
     fun createPost(
         @Valid @RequestBody request: PostCreateRequest,
     ): ApiResponse<PostResponse> {
