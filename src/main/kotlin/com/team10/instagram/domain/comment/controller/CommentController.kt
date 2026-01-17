@@ -3,6 +3,7 @@ package com.team10.instagram.domain.comment.controller
 import com.team10.instagram.domain.comment.dto.CommentCreateRequest
 import com.team10.instagram.domain.comment.dto.CommentResponse
 import com.team10.instagram.domain.comment.dto.CommentUpdateRequest
+import com.team10.instagram.domain.comment.service.CommentService
 import com.team10.instagram.global.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
@@ -15,13 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime // for mocking
-// removed for dummy output
-// import com.team10.instagram.domain.comment.service.CommentService
 
 @RestController
 @RequestMapping("/api/v1/posts")
 class CommentController(
-    // private val commentService: CommentService,
+    private val commentService: CommentService,
 ) {
     @PostMapping("/{postId}/comments")
     @Operation(summary = "댓글 생성", description = "특정 게시글에 댓글을 작성합니다.")
