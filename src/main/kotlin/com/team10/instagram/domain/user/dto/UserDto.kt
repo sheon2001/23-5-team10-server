@@ -18,7 +18,7 @@ data class UserDto(
     val role: String,
 ) {
     constructor(user: User) : this(
-        userId = user.userId,
+        userId = user.userId!!,
         email = user.email,
         nickname = user.nickname,
         profileImageUrl = user.profileImageUrl,

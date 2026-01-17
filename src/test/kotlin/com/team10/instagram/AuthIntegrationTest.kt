@@ -39,8 +39,6 @@ class AuthIntegrationTest
         @BeforeEach
         fun setup() {
             val encodedPassword = passwordEncoder.encode("password123")
-            println("User Repository")
-            println(userRepository.findAll())
             testUser =
                 userRepository.save(
                     User(
@@ -49,10 +47,7 @@ class AuthIntegrationTest
                         nickname = "tester",
                         role = Role.USER,
                     ),
-                )
-            println("User Repository")
-            println(userRepository.findAll())
-        }
+                )}
 
         @Test
         fun `login with email returns JWT token`() {
@@ -214,7 +209,7 @@ class AuthIntegrationTest
                     status { isOk() }
                 }
 
-            assert(!userRepository.existsByUserId(testUser.userId))
+            assert(!userRepository.existsByUserId(testUser.userId!!))
             assert(jwtTokenBlacklistService.contains(token))
         }
 

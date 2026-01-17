@@ -53,7 +53,7 @@ class UserController(
     ): ApiResponse<String> {
         val token = authorizationHeader.replace("Bearer", "").trim()
 
-        userService.deleteUser(user.userId)
+        userService.deleteUser(user.userId!!)
         jwtTokenBlacklistService.add(token)
 
         return ApiResponse.onSuccess("Account deleted successfully")
