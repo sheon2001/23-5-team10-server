@@ -34,7 +34,7 @@ class CommentService(
         val comment =
             Comment(
                 postId = postId,
-                userId = user.userId,
+                userId = user.userId!!,
                 content = request.content,
             )
 
@@ -96,7 +96,7 @@ class CommentService(
         CommentResponse(
             id = comment.id!!,
             postId = comment.postId,
-            userId = writer.userId,
+            userId = writer.userId!!,
             nickname = writer.nickname,
             profileImageUrl = writer.profileImageUrl,
             content = comment.content,
