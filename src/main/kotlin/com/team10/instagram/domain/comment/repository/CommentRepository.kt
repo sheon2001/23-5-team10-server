@@ -6,7 +6,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
 interface CommentRepository : CrudRepository<Comment, Long> {
-    @Query("SELECT * FROM comment WHERE post_id = :postId ORDER BY created_at DESC")
+    /* Change created_at to comment_id because DATE_TIME precision issues on DB (seconds)
+       Therefore, temporally use auto-increment property of Id
+     */
+    @Query("SELECT * FROM comment WHERE post_id = :postId ORDER BY comment_id DESC")
     fun findAllByPostIdOrderByCreatedAtDesc(
         @Param("postId") postId: Long,
     ): List<Comment>

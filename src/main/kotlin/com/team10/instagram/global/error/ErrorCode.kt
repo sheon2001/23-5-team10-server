@@ -25,6 +25,8 @@ enum class ErrorCode(
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "401", "인증 정보가 만료되었습니다."),
     REFRESH_TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "401", "재발급 토큰이 재사용되었습니다."),
 
+    EMPTY_CONTENT(HttpStatus.BAD_REQUEST, "400", "내용이 비어 있습니다."),
+
     // 팔로우 관련 에러
     SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "FOLLOW_400_1", "자기 자신은 팔로우할 수 없습니다."),
 }
