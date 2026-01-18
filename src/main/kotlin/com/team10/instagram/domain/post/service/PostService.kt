@@ -40,7 +40,7 @@ class PostService(
 
         val post =
             Post(
-                userId = user.userId,
+                userId = user.userId!!,
                 content = request.content,
                 albumId = request.albumId,
                 images = images,
@@ -136,7 +136,7 @@ class PostService(
 
     @Transactional(readOnly = true)
     fun getBookmarkedPosts(user: User): List<PostResponse> {
-        val bookmarks = bookmarkRepository.findAllByUserId(user.userId)
+        val bookmarks = bookmarkRepository.findAllByUserId(user.userId!!)
         val posts =
             bookmarks.mapNotNull { bookmark ->
                 postRepository.findByIdOrNull(bookmark.postId)
@@ -154,7 +154,7 @@ class PostService(
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         val updatedPost =
             post.copy(
@@ -175,7 +175,7 @@ class PostService(
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         postRepository.delete(post)
     }
@@ -187,8 +187,8 @@ class PostService(
     ) {
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (!postLikeRepository.existsByPostIdAndUserId(postId, user.userId)) {
-            postLikeRepository.save(PostLike(postId = postId, userId = user.userId))
+        if (!postLikeRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
+            postLikeRepository.save(PostLike(postId = postId, userId = user.userId!!))
         }
     }
 
@@ -199,7 +199,7 @@ class PostService(
     ) {
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        val like = postLikeRepository.findByPostIdAndUserId(postId, user.userId)
+        val like = postLikeRepository.findByPostIdAndUserId(postId, user.userId!!)
         if (like != null) postLikeRepository.delete(like)
     }
 
@@ -210,8 +210,8 @@ class PostService(
     ) {
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (!bookmarkRepository.existsByPostIdAndUserId(postId, user.userId)) {
-            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId))
+        if (!bookmarkRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
+            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId!!))
         }
     }
 
@@ -222,7 +222,7 @@ class PostService(
     ) {
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        val bookmark = bookmarkRepository.findByPostIdAndUserId(postId, user.userId)
+        val bookmark = bookmarkRepository.findByPostIdAndUserId(postId, user.userId!!)
         if (bookmark != null) bookmarkRepository.delete(bookmark)
     }
 
@@ -237,12 +237,12 @@ class PostService(
         val likeCount = postLikeRepository.countByPostId(post.id!!)
         val commentCount = commentRepository.countByPostId(post.id)
 
-        val isLiked = currentUser?.let { postLikeRepository.existsByPostIdAndUserId(post.id, it.userId) } ?: false
-        val isBookmarked = currentUser?.let { bookmarkRepository.existsByPostIdAndUserId(post.id, it.userId) } ?: false
+        val isLiked = currentUser?.let { postLikeRepository.existsByPostIdAndUserId(post.id, it.userId!!) } ?: false
+        val isBookmarked = currentUser?.let { bookmarkRepository.existsByPostIdAndUserId(post.id, it.userId!!) } ?: false
 
         return PostResponse(
             id = post.id,
-            userId = author.userId,
+            userId = author.userId!!,
             nickname = author.nickname,
             profileImageUrl = author.profileImageUrl,
             content = post.content,
