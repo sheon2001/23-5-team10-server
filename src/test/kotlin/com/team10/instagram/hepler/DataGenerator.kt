@@ -18,13 +18,12 @@ class DataGenerator(
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
     private val followRepository: FollowRepository,
-    private val jwtTokenProvider: JwtTokenProvider
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
-
     // Generate User
     fun generateUser(
         email: String? = null,
-        nickname: String? = null
+        nickname: String? = null,
     ): User {
         val randomStr = Random.nextInt(1000000).toString()
         return userRepository.save(
@@ -32,29 +31,27 @@ class DataGenerator(
                 email = email ?: "user$randomStr@example.com",
                 nickname = nickname ?: "nick$randomStr",
                 password = "password",
-                profileImageUrl = "https://dummyimage.com/100"
-            )
+                profileImageUrl = "https://dummyimage.com/100",
+            ),
         )
     }
 
     // Generate a Jwt token for user
-    fun generateToken(user: User): String {
-        return jwtTokenProvider.createAccessToken(user.userId!!)
-    }
+    fun generateToken(user: User): String = jwtTokenProvider.createAccessToken(user.userId!!)
 
     // Generate single post
     fun generatePost(
         user: User,
         content: String? = null,
-        images: List<String> = listOf("http://img1.com")
+        images: List<String> = listOf("http://img1.com"),
     ): Post {
         val postImages = images.map { PostImage(imageUrl = it) }
         return postRepository.save(
             Post(
                 userId = user.userId!!,
                 content = content ?: "테스트 게시글입니다.",
-                images = postImages
-            )
+                images = postImages,
+            ),
         )
     }
 
@@ -62,22 +59,24 @@ class DataGenerator(
     fun generateComment(
         post: Post,
         user: User,
-        content: String? = null
-    ): Comment {
-        return commentRepository.save(
+        content: String? = null,
+    ): Comment =
+        commentRepository.save(
             Comment(
                 postId = post.id!!,
                 userId = user.userId!!,
-                content = content ?: "테스트 댓글입니다."
-            )
+                content = content ?: "테스트 댓글입니다.",
+            ),
         )
-    }
 
     // Generate follow relation
-    fun generateFollow(fromUser: User, toUser: User) {
+    fun generateFollow(
+        fromUser: User,
+        toUser: User,
+    ) {
         followRepository.save(
             fromUserId = fromUser.userId!!,
-            toUserId = toUser.userId!!
+            toUserId = toUser.userId!!,
         )
     }
 }
