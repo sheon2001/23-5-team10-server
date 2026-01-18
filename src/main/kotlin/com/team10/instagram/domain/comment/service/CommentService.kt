@@ -31,6 +31,10 @@ class CommentService(
             throw CustomException(ErrorCode.POST_NOT_FOUND)
         }
 
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
+
         val comment =
             Comment(
                 postId = postId,
@@ -68,6 +72,10 @@ class CommentService(
                 ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
 
         if (comment.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
 
         val updatedComment = comment.copy(content = request.content)
         val saved = commentRepository.save(updatedComment)
