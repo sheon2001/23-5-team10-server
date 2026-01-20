@@ -34,6 +34,10 @@ class PostService(
         user: User,
         request: PostCreateRequest,
     ): PostResponse {
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
+
         val images = request.imageUrls.map { PostImage(imageUrl = it) }
 
         val post =
@@ -85,7 +89,7 @@ class PostService(
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         val updatedPost =
             post.copy(
@@ -106,7 +110,7 @@ class PostService(
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         postRepository.delete(post)
     }
@@ -119,7 +123,7 @@ class PostService(
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
         if (!postLikeRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            postLikeRepository.save(PostLike(postId = postId, userId = user.userId!!))
+            postLikeRepository.save(PostLike(postId = postId, userId = user.userId))
         }
     }
 
@@ -142,7 +146,7 @@ class PostService(
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
         if (!bookmarkRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId!!))
+            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId))
         }
     }
 

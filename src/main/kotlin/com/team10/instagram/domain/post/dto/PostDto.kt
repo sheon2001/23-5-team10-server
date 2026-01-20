@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 data class PostCreateRequest(
     @Schema(description = "게시글 내용", example = "오늘 날씨 좋다!")
     @field:NotBlank(message = "게시글 내용을 입력해주세요.")
-    @field:Size(min = 1, max = 1000, message = "게시글은 1자 이상 1000자 이하여야 합니다.")
+    @field:Size(max = 1000, message = "게시글은 1000자 이하여야 합니다.")
     val content: String,
     val albumId: Long?,
     val imageUrls: List<String> = emptyList(),
@@ -17,7 +17,7 @@ data class PostCreateRequest(
 data class PostUpdateRequest(
     @Schema(description = "수정할 게시글 내용", example = "오늘 날씨 좋다!")
     @field:NotBlank(message = "수정할 게시글 내용을 입력해주세요.")
-    @field:Size(min = 1, max = 1000, message = "게시글은 1자 이상 1000자 이하여야 합니다.")
+    @field:Size(max = 1000, message = "게시글은 1000자 이하여야 합니다.")
     val content: String,
     val albumId: Long?,
     val imageUrls: List<String> = emptyList(),
