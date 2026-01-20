@@ -1,7 +1,6 @@
 package com.team10.instagram.domain.post.service
 
 import com.team10.instagram.domain.comment.repository.CommentRepository
-import com.team10.instagram.domain.follow.repository.FollowRepository
 import com.team10.instagram.domain.post.dto.PostCreateRequest
 import com.team10.instagram.domain.post.dto.PostImageResponse
 import com.team10.instagram.domain.post.dto.PostResponse
@@ -29,7 +28,6 @@ class PostService(
     private val bookmarkRepository: BookmarkRepository,
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
-    private val followRepository: FollowRepository,
 ) {
     @Transactional
     fun create(

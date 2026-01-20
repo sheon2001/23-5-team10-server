@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.team10.instagram.domain.comment.dto.CommentCreateRequest
 import com.team10.instagram.domain.comment.dto.CommentUpdateRequest
 import com.team10.instagram.domain.comment.repository.CommentRepository
-import com.team10.instagram.domain.post.repository.PostRepository
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.helper.DataGenerator
 import org.junit.jupiter.api.Assertions.assertNull
@@ -33,7 +32,6 @@ class CommentIntegrationTest
         private val mvc: MockMvc,
         private val dataGenerator: DataGenerator,
         private val commentRepository: CommentRepository,
-        private val postRepository: PostRepository,
     ) {
         private val objectMapper = ObjectMapper()
         private lateinit var myUser: User

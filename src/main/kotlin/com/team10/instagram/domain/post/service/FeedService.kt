@@ -15,7 +15,6 @@ import com.team10.instagram.global.error.ErrorCode
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import kotlin.math.ceil
 
 @Service
@@ -36,10 +35,10 @@ class FeedService(
         val pageIndex = if (page < 1) 1 else page
         val offset = (pageIndex - 1) * size.toLong()
 
-        // 1. 내가 팔로우하는 유저 ID 목록 조회
+        // Retrieve all followers
         val followingIds = followRepository.findAllFollowingIds(user.userId!!)
 
-        // 2. 팔로우한 사람이 없으면 빈 결과 반환
+        // Return empty result if followers is zero
         if (followingIds.isEmpty()) {
             return FeedResponse(
                 items = emptyList(),
@@ -52,12 +51,12 @@ class FeedService(
             )
         }
 
-        // 3. 게시글 조회
+        // Retrieve followers' posts
         val posts = postRepository.findAllByUserIdsIn(followingIds, size, offset)
         val totalElements = postRepository.countByUserIdsIn(followingIds)
         val totalPages = ceil(totalElements.toDouble() / size).toInt()
 
-        // 4. DTO 변환
+        // Transform to DTO
         val items =
             posts.map { post ->
                 val author =
@@ -82,7 +81,7 @@ class FeedService(
                     thumbnailImageUrl = thumbnail,
                     likeCount = likeCount,
                     commentCount = commentCount,
-                    createdAt = post.createdAt ?: LocalDateTime.now(),
+                    createdAt = post.createdAt!!,
                     liked = isLiked,
                     bookmarked = isBookmarked,
                 )
