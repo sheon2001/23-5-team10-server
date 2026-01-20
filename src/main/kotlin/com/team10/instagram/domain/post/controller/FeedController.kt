@@ -3,7 +3,7 @@ package com.team10.instagram.domain.post.controller
 import com.team10.instagram.domain.post.dto.FeedAuthorDto
 import com.team10.instagram.domain.post.dto.FeedPostDto
 import com.team10.instagram.domain.post.dto.FeedResponse
-import com.team10.instagram.domain.post.service.PostService
+import com.team10.instagram.domain.post.service.FeedService
 import com.team10.instagram.domain.user.LoggedInUser
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.global.common.ApiResponse
@@ -20,7 +20,7 @@ import java.time.LocalDateTime // for mocking
 @RequestMapping("/api/v1/feed")
 @Tag(name = "Feed API", description = "피드 관련 API")
 class FeedController(
-    private val postService: PostService,
+    private val feedService: FeedService,
 ) {
     @GetMapping
     @Operation(summary = "피드 조회", description = "팔로우한 유저들의 게시글을 최신순으로 조회합니다.")
