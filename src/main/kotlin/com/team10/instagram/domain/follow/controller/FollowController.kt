@@ -2,6 +2,7 @@ package com.team10.instagram.domain.follow.controller
 
 import com.team10.instagram.domain.follow.dto.FollowResponse
 import com.team10.instagram.domain.follow.service.FollowService
+import com.team10.instagram.domain.user.LoggedInUser
 import com.team10.instagram.global.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -23,10 +24,9 @@ class FollowController(
     @Operation(summary = "팔로우/언팔로우 요청", description = "팔로우 <-> 언팔로우 전환 요청입니다.")
     fun toggleFollow(
         @PathVariable toUserId: Long,
+        @LoggedInUser loggedInUser: Long
     ): ApiResponse<String> {
-        // TODO() : 현재 로그인 한 유저 ID 가져오기
-        val currentUserId = 1L
-        val message = followService.toggleFollow(currentUserId, toUserId)
+        val message = followService.toggleFollow(loggedInUser, toUserId)
 
         return ApiResponse.onSuccess(message)
     }
@@ -36,10 +36,9 @@ class FollowController(
     @Operation(summary = "팔로워 목록 조회", description = "특정 유저를 팔로우 하는 사람들의 목록을 조회합니다.")
     fun getFollowers(
         @PathVariable userId: Long,
+        @LoggedInUser loggedInUser: Long
     ): ApiResponse<List<FollowResponse>> {
-        // TODO() : 현재 로그인 한 유저 ID 가져오기
-        val currentUserId = 1L
-        val followers = followService.getFollowers(userId, currentUserId)
+        val followers = followService.getFollowers(userId, loggedInUser)
 
         return ApiResponse.onSuccess(followers)
     }
@@ -49,10 +48,9 @@ class FollowController(
     @Operation(summary = "팔로잉 목록 조회", description = "특정 유저가 팔로우 하는 사람들의 목록을 조회합니다.")
     fun getFollowings(
         @PathVariable userId: Long,
+        @LoggedInUser loggedInUser: Long
     ): ApiResponse<List<FollowResponse>> {
-        // TODO() : 현재 로그인 한 유저 ID 가져오기
-        val currentUserId = 1L
-        val followings = followService.getFollowings(userId, currentUserId)
+        val followings = followService.getFollowings(userId, loggedInUser)
 
         return ApiResponse.onSuccess(followings)
     }
@@ -62,10 +60,9 @@ class FollowController(
     @Operation(summary = "팔로워 삭제 (강제 언팔)", description = "내 팔로워 목록에서 특정 유저를 삭제합니다. (상대방의 팔로잉 목록에서 내가 사라짐)")
     fun deleteFollower(
         @PathVariable followerId: Long,
+        @LoggedInUser loggedInUser: Long
     ): ApiResponse<Unit> {
-        // TODO() : 현재 로그인 한 유저 ID 가져오기
-        val currentUserId = 1L
-        followService.deleteFollower(currentUserId, followerId)
+        followService.deleteFollower(loggedInUser, followerId)
 
         return ApiResponse.onSuccess(Unit)
     }
