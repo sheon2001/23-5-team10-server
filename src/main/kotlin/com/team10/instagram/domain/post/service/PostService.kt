@@ -85,6 +85,10 @@ class PostService(
         postId: Long,
         request: PostUpdateRequest,
     ): PostResponse {
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
+
         val post =
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)

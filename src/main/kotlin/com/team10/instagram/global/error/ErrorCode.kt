@@ -10,7 +10,7 @@ enum class ErrorCode(
     // 공통 에러
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "서버 내부 에러가 발생했습니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "400", "입력값이 올바르지 않습니다."),
-    ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "403", "접근 권한이 없습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "403", "접근 권한이 없습니다."),
 
     // 유저 관련 에러 (예시)
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "존재하지 않는 회원입니다."),
@@ -26,6 +26,9 @@ enum class ErrorCode(
     // 게시글 관련 에러 (예시)
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "게시글을 찾을 수 없습니다."),
     EMPTY_CONTENT(HttpStatus.BAD_REQUEST, "400", "내용이 비어 있습니다."),
+
+    // 댓글 관련 에러
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "댓글을 찾을 수 없습니다."),
 
     // 팔로우 관련 에러
     SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "FOLLOW_400_1", "자기 자신은 팔로우할 수 없습니다."),

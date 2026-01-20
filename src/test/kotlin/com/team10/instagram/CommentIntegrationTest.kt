@@ -64,6 +64,24 @@ class CommentIntegrationTest
         }
 
         @Test
+        fun `빈 내용으로 댓글을 작성하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val post = dataGenerator.generatePost(user = user)
+            val request = CommentCreateRequest(content = "")
+
+            // when & then
+            mvc
+                .perform(
+                    post("/api/v1/posts/${post.id}/comments")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isBadRequest) // 400 Bad Request
+        }
+
+        @Test
         fun `게시글의 댓글 목록을 조회할 수 있다`() {
             // given
             val user = myUser
@@ -107,6 +125,47 @@ class CommentIntegrationTest
         }
 
         @Test
+        fun `빈 내용으로 댓글을 수정하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val post = dataGenerator.generatePost(user = user)
+            val comment = dataGenerator.generateComment(post = post, user = user, content = "수정 전 댓글")
+
+            val request = CommentUpdateRequest(content = "")
+
+            // when & then
+            mvc
+                .perform(
+                    put("/api/v1/posts/${post.id}/comments/${comment.id}")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isBadRequest) // 400 Bad Request
+        }
+
+        @Test
+        fun `다른 유저의 댓글을 수정하려 하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+            val post = dataGenerator.generatePost(user = otherUser)
+            val comment = dataGenerator.generateComment(post = post, user = otherUser, content = "다른 사람의 댓글")
+
+            val request = CommentUpdateRequest(content = "다른 유저의 댓글에 대한 수정 요청")
+
+            // when & then
+            mvc
+                .perform(
+                    put("/api/v1/posts/${post.id}/comments/${comment.id}")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isForbidden) // 403 Forbidden
+        }
+
+        @Test
         fun `댓글을 삭제할 수 있다`() {
             // given
             val user = myUser
@@ -125,40 +184,19 @@ class CommentIntegrationTest
         }
 
         @Test
-        fun `빈 내용으로 댓글을 작성하면 실패한다`() {
+        fun `다른 유저의 댓글을 삭제하려 하면 실패한다`() {
             // given
             val user = myUser
             val token = myToken
-            val post = dataGenerator.generatePost(user = user)
-            val request = CommentCreateRequest(content = "")
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+            val post = dataGenerator.generatePost(user = otherUser)
+            val comment = dataGenerator.generateComment(post = post, user = otherUser)
 
             // when & then
             mvc
                 .perform(
-                    post("/api/v1/posts/${post.id}/comments")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)),
-                ).andExpect(status().isBadRequest) // 400 Bad Request
-        }
-
-        @Test
-        fun `빈 내용으로 댓글을 수정하면 실패한다`() {
-            // given
-            val user = myUser
-            val token = myToken
-            val post = dataGenerator.generatePost(user = user)
-            val comment = dataGenerator.generateComment(post = post, user = user, content = "수정 전 댓글")
-
-            val request = CommentUpdateRequest(content = "")
-
-            // when & then
-            mvc
-                .perform(
-                    put("/api/v1/posts/${post.id}/comments/${comment.id}")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)),
-                ).andExpect(status().isBadRequest) // 400 Bad Request
+                    delete("/api/v1/posts/${post.id}/comments/${comment.id}")
+                        .header("Authorization", myToken),
+                ).andExpect(status().isForbidden) // 403 Forbidden
         }
     }

@@ -75,6 +75,27 @@ class PostIntegrationTest
         }
 
         @Test
+        fun `빈 내용으로 게시글을 생성하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val request =
+                PostCreateRequest(
+                    content = "",
+                    albumId = null,
+                )
+
+            // when & then
+            mvc
+                .perform(
+                    post("/api/v1/posts")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isBadRequest) // 400 Bad Request
+        }
+
+        @Test
         fun `게시글을 상세 조회할 수 있다`() {
             // given
             val user = myUser
@@ -92,6 +113,21 @@ class PostIntegrationTest
                 .andExpect(jsonPath("$.data.id").value(post.id))
                 .andExpect(jsonPath("$.data.content").value("조회용 게시글"))
                 .andExpect(jsonPath("$.data.userId").value(otherUser.userId))
+        }
+
+        @Test
+        fun `존재하지 않는 게시글을 조회하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val notExistPostId = 99999L
+
+            // when & then
+            mvc
+                .perform(
+                    get("/api/v1/posts/$notExistPostId")
+                        .header("Authorization", token),
+                ).andExpect(status().isNotFound) // 404 Not Found
         }
 
         @Test
@@ -124,6 +160,49 @@ class PostIntegrationTest
         }
 
         @Test
+        fun `빈 내용으로 게시글을 수정하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val post = dataGenerator.generatePost(user = user, content = "원본 글")
+
+            val request =
+                PostUpdateRequest(
+                    content = "",
+                    albumId = null,
+                )
+
+            // when & then
+            mvc
+                .perform(
+                    put("/api/v1/posts/${post.id}")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isBadRequest) // 400 Bad Request
+        }
+
+        @Test
+        fun `다른 유저의 게시글을 수정하려 하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+            val post = dataGenerator.generatePost(user = otherUser, content = "원본 글")
+
+            val request = PostUpdateRequest(content = "해킹 시도", albumId = null)
+
+            // when & then
+            mvc
+                .perform(
+                    put("/api/v1/posts/${post.id}")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andExpect(status().isForbidden) // 403 Forbidden
+        }
+
+        @Test
         fun `작성자는 본인의 게시글을 삭제할 수 있다`() {
             // given
             val user = myUser
@@ -139,6 +218,22 @@ class PostIntegrationTest
 
             // check DB status
             assertNull(postRepository.findByIdOrNull(post.id!!))
+        }
+
+        @Test
+        fun `다른 유저의 게시글을 삭제하려 하면 실패한다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+            val post = dataGenerator.generatePost(user = otherUser)
+
+            // when & then
+            mvc
+                .perform(
+                    delete("/api/v1/posts/${post.id}")
+                        .header("Authorization", token),
+                ).andExpect(status().isForbidden) // 403 Forbidden
         }
 
         @Test
