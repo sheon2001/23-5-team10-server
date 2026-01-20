@@ -54,20 +54,26 @@ class FollowRepository(
         return jdbcTemplate.query(sql, followRowMapper, loginUserId, targetUserId)
     }
 
-    // 5. 팔로잉 목록 조회 (내가 팔로우 하는 사람들)
+    // 5. 팔로잉 목록 조회
     fun findAllFollowings(
         targetUserId: Long,
         loginUserId: Long,
     ): List<FollowResponse> {
         val sql = """
-            SELECT u.user_id, u.nickname, u.profile_image_url,
-                   -- TODO() : 자기 자신일 경우 제외 로직 필요
-                   true as is_following
-            FROM follow f
-            JOIN users u ON f.to_user_id = u.user_id
-            WHERE f.from_user_id = ?
-        """
-        return jdbcTemplate.query(sql, followRowMapper, targetUserId)
+        SELECT u.user_id, u.nickname, u.profile_image_url,
+               EXISTS(SELECT 1 FROM follow f2 WHERE f2.from_user_id = ? AND f2.to_user_id = u.user_id) as is_following
+        FROM follow f
+        JOIN users u ON f.to_user_id = u.user_id
+        WHERE f.from_user_id = ?
+    """
+        return jdbcTemplate.query(sql, followRowMapper, loginUserId, targetUserId)
+    }
+
+    // 6. 팔로잉 목록 조회 (ID만)
+    fun findAllFollowingIds(fromUserId: Long): List<Long> {
+        val sql = "SELECT to_user_id FROM follow WHERE from_user_id = ?"
+
+        return jdbcTemplate.queryForList(sql, Long::class.java, fromUserId)
     }
 
     // DB 결과를 DTO로 변환
