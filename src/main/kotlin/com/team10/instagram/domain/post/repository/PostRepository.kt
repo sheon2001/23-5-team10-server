@@ -6,14 +6,17 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
 interface PostRepository : CrudRepository<Post, Long> {
-    @Query("SELECT * FROM post ORDER BY created_at DESC")
+    /* Change created_at to post_id because DATE_TIME precision issues on DB (seconds)
+       Therefore, temporally use auto-increment property of Id
+     */
+    @Query("SELECT * FROM post ORDER BY post_id DESC")
     fun findAllByOrderByCreatedAtDesc(): List<Post>
 
     @Query(
         """
         SELECT * FROM post 
         WHERE user_id IN (:userIds) 
-        ORDER BY created_at DESC 
+        ORDER BY post_id DESC 
         LIMIT :limit OFFSET :offset
     """,
     )

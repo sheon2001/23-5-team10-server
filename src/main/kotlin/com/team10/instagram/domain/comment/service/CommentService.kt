@@ -69,9 +69,9 @@ class CommentService(
     ): CommentResponse {
         val comment =
             commentRepository.findByIdOrNull(commentId)
-                ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+                ?: throw CustomException(ErrorCode.COMMENT_NOT_FOUND)
 
-        if (comment.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (comment.userId != user.userId) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         if (request.content.isBlank()) {
             throw CustomException(ErrorCode.EMPTY_CONTENT)
@@ -90,9 +90,9 @@ class CommentService(
     ) {
         val comment =
             commentRepository.findByIdOrNull(commentId)
-                ?: throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+                ?: throw CustomException(ErrorCode.COMMENT_NOT_FOUND)
 
-        if (comment.userId != user.userId) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (comment.userId != user.userId) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         commentRepository.delete(comment)
     }

@@ -1,7 +1,6 @@
 package com.team10.instagram.domain.post.service
 
 import com.team10.instagram.domain.comment.repository.CommentRepository
-import com.team10.instagram.domain.follow.repository.FollowRepository
 import com.team10.instagram.domain.post.dto.PostCreateRequest
 import com.team10.instagram.domain.post.dto.PostImageResponse
 import com.team10.instagram.domain.post.dto.PostResponse
@@ -29,13 +28,16 @@ class PostService(
     private val bookmarkRepository: BookmarkRepository,
     private val commentRepository: CommentRepository,
     private val userRepository: UserRepository,
-    private val followRepository: FollowRepository,
 ) {
     @Transactional
     fun create(
         user: User,
         request: PostCreateRequest,
     ): PostResponse {
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
+
         val images = request.imageUrls.map { PostImage(imageUrl = it) }
 
         val post =
@@ -67,73 +69,6 @@ class PostService(
         return posts.map { convertToDto(it, user) }
     }
 
-    /*
-    @Transactional(readOnly = true)
-    fun getFeed(user: User, page: Int, size: Int): FeedResponse {
-        val pageIndex = if (page < 1) 1 else page
-        val offset = (pageIndex - 1) * size.toLong()
-
-        // Need to be implemented
-        val followingIds = followRepository.findAllFollowingIds(user.userId)
-
-        if (followingIds.isEmpty()) {
-            return FeedResponse(
-                items = emptyList(),
-                page = pageIndex,
-                size = size,
-                totalPages = 0,
-                totalElements = 0,
-                hasNext = false,
-                hasPrev = false
-            )
-        }
-
-        // 3. Fetch posts
-        val posts = postRepository.findAllByUserIdsIn(followingIds, size, offset)
-        val totalElements = postRepository.countByUserIdsIn(followingIds)
-        val totalPages = ceil(totalElements.toDouble() / size).toInt()
-
-        // 4. Map to DTO
-        val items = posts.map { post ->
-            val author = userRepository.findByIdOrNull(post.userId)
-                ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
-
-            val likeCount = postLikeRepository.countByPostId(post.id!!)
-            val commentCount = commentRepository.countByPostId(post.id)
-            val isLiked = postLikeRepository.existsByPostIdAndUserId(post.id, user.userId)
-            val isBookmarked = bookmarkRepository.existsByPostIdAndUserId(post.id, user.userId)
-
-            // Thumbnail is the first image, or null if no images
-            val thumbnail = post.images.firstOrNull()?.imageUrl
-
-            FeedPostDto(
-                postId = post.id,
-                author = FeedAuthorDto(
-                    userId = author.userId,
-                    nickname = author.nickname,
-                    profileImageUrl = author.profileImageUrl
-                ),
-                thumbnailImageUrl = thumbnail,
-                likeCount = likeCount,
-                commentCount = commentCount,
-                createdAt = post.createdAt ?: LocalDateTime.now(),
-                liked = isLiked,
-                bookmarked = isBookmarked
-            )
-        }
-
-        return FeedResponse(
-            items = items,
-            page = pageIndex,
-            size = size,
-            totalPages = totalPages,
-            totalElements = totalElements,
-            hasNext = pageIndex < totalPages,
-            hasPrev = pageIndex > 1
-        )
-    }
-     */
-
     @Transactional(readOnly = true)
     fun getBookmarkedPosts(user: User): List<PostResponse> {
         val bookmarks = bookmarkRepository.findAllByUserId(user.userId!!)
@@ -150,11 +85,15 @@ class PostService(
         postId: Long,
         request: PostUpdateRequest,
     ): PostResponse {
+        if (request.content.isBlank()) {
+            throw CustomException(ErrorCode.EMPTY_CONTENT)
+        }
+
         val post =
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         val updatedPost =
             post.copy(
@@ -175,7 +114,7 @@ class PostService(
             postRepository.findByIdOrNull(postId)
                 ?: throw CustomException(ErrorCode.POST_NOT_FOUND)
 
-        if (post.userId != user.userId!!) throw CustomException(ErrorCode.INVALID_INPUT_VALUE)
+        if (post.userId != user.userId!!) throw CustomException(ErrorCode.ACCESS_DENIED)
 
         postRepository.delete(post)
     }
@@ -188,7 +127,7 @@ class PostService(
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
         if (!postLikeRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            postLikeRepository.save(PostLike(postId = postId, userId = user.userId!!))
+            postLikeRepository.save(PostLike(postId = postId, userId = user.userId))
         }
     }
 
@@ -211,7 +150,7 @@ class PostService(
         if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
 
         if (!bookmarkRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId!!))
+            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId))
         }
     }
 

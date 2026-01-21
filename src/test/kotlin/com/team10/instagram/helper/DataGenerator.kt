@@ -10,6 +10,7 @@ import com.team10.instagram.domain.post.repository.PostRepository
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import kotlin.random.Random
 
 @Component
@@ -51,6 +52,8 @@ class DataGenerator(
                 userId = user.userId!!,
                 content = content ?: "테스트 게시글입니다.",
                 images = postImages,
+                createdAt = LocalDateTime.now(),
+                updatedAt = LocalDateTime.now(),
             ),
         )
     }
