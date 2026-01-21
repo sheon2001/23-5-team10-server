@@ -39,6 +39,9 @@ class SecurityConfig(
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                     ).permitAll()
+
+                // root
+                it.requestMatchers("/").permitAll()
                 // Auth 경로
                 it.requestMatchers("/api/v1/auth/**").permitAll()
                 // 나머지 요청은 인증 필요
@@ -54,6 +57,7 @@ class SecurityConfig(
 
         configuration.allowedOrigins =
             listOf(
+                "https://www.wfinstaclone.shop", // domain
                 "https://d1ki8kre4wetjx.cloudfront.net", // Front
                 "http://localhost:3000", // 로컬 (React/Next.js)
                 "http://localhost:5173", // 로컬 (Vite)
