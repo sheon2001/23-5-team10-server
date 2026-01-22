@@ -135,6 +135,74 @@ class PostIntegrationTest
         }
 
         @Test
+        fun `특정 유저의 게시글 목록을 조회할 수 있다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+
+            val post1 = dataGenerator.generatePost(user = otherUser, content = "첫 번째 게시글")
+            val post2 = dataGenerator.generatePost(user = otherUser, content = "두 번째 게시글")
+
+            postLikeRepository.save(PostLike(postId = post2.id!!, userId = user.userId!!))
+
+            val stranger = dataGenerator.generateUser(nickname = "stranger")
+            dataGenerator.generatePost(user = stranger, content = "남의 글")
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/users/${otherUser.userId}/posts")
+                        .header("Authorization", myToken)
+                        .contentType(MediaType.APPLICATION_JSON),
+                )
+                // then
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.posts").isArray)
+                .andExpect(jsonPath("$.data.posts.length()").value(2))
+                // Check sort by time (Lastest comment is first)
+                .andExpect(jsonPath("$.data.posts[0].id").value(post2.id))
+                .andExpect(jsonPath("$.data.posts[1].id").value(post1.id))
+                .andExpect(jsonPath("$.data.posts[0].content").value("두 번째 게시글"))
+                .andExpect(jsonPath("$.data.posts[0].isLiked").value(true))
+                .andExpect(jsonPath("$.data.posts[1].isLiked").value(false))
+        }
+
+        @Test
+        fun `게시글이 없는 유저를 조회하면 빈 리스트가 반환된다`() {
+            // given
+            val user = myUser
+            val token = myToken
+            val otherUser = dataGenerator.generateUser(nickname = "other")
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/users/${otherUser.userId}/posts")
+                        .header("Authorization", myToken),
+                )
+                // then
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.data.posts").isArray)
+                .andExpect(jsonPath("$.data.posts").isEmpty())
+        }
+
+        @Test
+        fun `존재하지 않는 유저의 게시글을 조회하면 실패한다`() {
+            // given
+            val invalidUserId = 99999L
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/users/$invalidUserId/posts")
+                        .header("Authorization", myToken),
+                )
+                // then
+                .andExpect(status().isNotFound)
+        }
+
+        @Test
         fun `작성자는 본인의 게시글을 수정할 수 있다`() {
             // given
             val user = myUser
