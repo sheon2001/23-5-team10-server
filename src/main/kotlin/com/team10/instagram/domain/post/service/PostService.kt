@@ -70,6 +70,20 @@ class PostService(
     }
 
     @Transactional(readOnly = true)
+    fun getPostsByUserId(
+        currentUser: User,
+        targetUserId: Long,
+    ): List<PostResponse> {
+        if (!userRepository.existsById(targetUserId)) {
+            throw CustomException(ErrorCode.USER_NOT_FOUND)
+        }
+
+        val posts = postRepository.findAllByUserIdOrderByCreatedAtDesc(targetUserId)
+
+        return posts.map { convertToDto(it, currentUser) }
+    }
+
+    @Transactional(readOnly = true)
     fun getBookmarkedPosts(user: User): List<PostResponse> {
         val bookmarks = bookmarkRepository.findAllByUserId(user.userId!!)
         val posts =
