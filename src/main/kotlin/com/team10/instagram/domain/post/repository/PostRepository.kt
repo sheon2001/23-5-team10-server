@@ -6,6 +6,13 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
 interface PostRepository : CrudRepository<Post, Long> {
+    /* Apply pessimistic lock for transactional operations
+     */
+    @Query("SELECT * FROM post WHERE post_id = :id FOR UPDATE")
+    fun findByIdWithLock(
+        @Param("id") id: Long,
+    ): Post?
+
     /* Change created_at to post_id because DATE_TIME precision issues on DB (seconds)
        Therefore, temporally use auto-increment property of Id
      */

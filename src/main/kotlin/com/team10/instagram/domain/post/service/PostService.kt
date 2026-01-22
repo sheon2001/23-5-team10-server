@@ -124,11 +124,17 @@ class PostService(
         user: User,
         postId: Long,
     ) {
-        if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
-
-        if (!postLikeRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            postLikeRepository.save(PostLike(postId = postId, userId = user.userId))
+        // Apply pessimistic lock: Queueing duplicate requests
+        if (postRepository.findByIdWithLock(postId) == null) {
+            throw CustomException(ErrorCode.POST_NOT_FOUND)
         }
+
+        // return 200 OK for duplicate requests
+        if (postLikeRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
+            return
+        }
+
+        postLikeRepository.save(PostLike(postId = postId, userId = user.userId))
     }
 
     @Transactional
@@ -147,11 +153,17 @@ class PostService(
         user: User,
         postId: Long,
     ) {
-        if (!postRepository.existsById(postId)) throw CustomException(ErrorCode.POST_NOT_FOUND)
-
-        if (!bookmarkRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
-            bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId))
+        // Apply pessimistic lock: Queueing duplicate requests
+        if (postRepository.findByIdWithLock(postId) == null) {
+            throw CustomException(ErrorCode.POST_NOT_FOUND)
         }
+
+        // return 200 OK for duplicate requests
+        if (bookmarkRepository.existsByPostIdAndUserId(postId, user.userId!!)) {
+            return
+        }
+
+        bookmarkRepository.save(Bookmark(postId = postId, userId = user.userId))
     }
 
     @Transactional
