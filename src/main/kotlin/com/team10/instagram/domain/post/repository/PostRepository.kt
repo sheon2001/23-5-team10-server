@@ -45,4 +45,12 @@ interface PostRepository : CrudRepository<Post, Long> {
     fun countByUserIdsIn(
         @Param("userIds") userIds: List<Long>,
     ): Long
+
+    /* Returns single user_id that corresponds given post_id
+       For album logic implementation
+     */
+    @Query("SELECT user_id FROM post WHERE post_id = :postId")
+    fun findUserIdByPostId(
+        @Param("postId") postId: Long,
+    ): Long?
 }
