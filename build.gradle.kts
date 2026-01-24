@@ -64,6 +64,9 @@ dependencies {
 
     // AWS S3
     implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:4.0.0-RC1")
+
+    // logging
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.14")
 }
 
 kotlin {

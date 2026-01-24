@@ -33,5 +33,14 @@ data class ApiResponse<T>(
                 message = message,
                 data = null,
             )
+
+        // 유효성 검사 실패 시
+        fun <T> onFailure(code: String, message: String, data: T): ApiResponse<T> =
+            ApiResponse(
+                isSuccess = false,
+                code = code,
+                message = message,
+                data = data,
+            )
     }
 }
