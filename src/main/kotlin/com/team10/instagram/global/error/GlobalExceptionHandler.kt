@@ -13,7 +13,6 @@ private val logger = KotlinLogging.logger {}
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
     // 1. 커스텀 에러 처리
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(e: CustomException): ResponseEntity<ApiResponse<Nothing>> =
@@ -24,24 +23,29 @@ class GlobalExceptionHandler {
     // 2. @Valid 유효성 검사 실패 처리
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Map<String, String>>> {
-
         // 에러가 난 필드와 메시지를 Map으로 변환 (예: "email" to "이메일 형식이 아닙니다")
-        val errors = e.bindingResult.fieldErrors.associate {
-            it.field to (it.defaultMessage ?: "알 수 없는 에러")
-        }
+        val errors =
+            e.bindingResult.fieldErrors.associate {
+                it.field to (it.defaultMessage ?: "알 수 없는 에러")
+            }
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(ApiResponse.onFailure(
-                ErrorCode.INVALID_INPUT_VALUE.code,
-                ErrorCode.INVALID_INPUT_VALUE.message,
-                errors // 에러 Map
-            ))
+            .body(
+                ApiResponse.onFailure(
+                    ErrorCode.INVALID_INPUT_VALUE.code,
+                    ErrorCode.INVALID_INPUT_VALUE.message,
+                    errors, // 에러 Map
+                ),
+            )
     }
 
     // 3. 기타 에러 처리
     @ExceptionHandler(Exception::class)
-    fun handleException(e: Exception, request: HttpServletRequest): ResponseEntity<ApiResponse<Nothing>> {
+    fun handleException(
+        e: Exception,
+        request: HttpServletRequest,
+    ): ResponseEntity<ApiResponse<Nothing>> {
         logger.error(e) { "예상치 못한 에러 발생 !! url: ${request.method} ${request.requestURI}" }
 
         return ResponseEntity

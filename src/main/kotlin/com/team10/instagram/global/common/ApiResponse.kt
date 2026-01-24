@@ -35,7 +35,11 @@ data class ApiResponse<T>(
             )
 
         // 유효성 검사 실패 시
-        fun <T> onFailure(code: String, message: String, data: T): ApiResponse<T> =
+        fun <T> onFailure(
+            code: String,
+            message: String,
+            data: T,
+        ): ApiResponse<T> =
             ApiResponse(
                 isSuccess = false,
                 code = code,
