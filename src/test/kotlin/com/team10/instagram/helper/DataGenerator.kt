@@ -1,5 +1,6 @@
 package com.team10.instagram.helper
 
+import com.team10.instagram.domain.album.repository.AlbumRepository
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
 import com.team10.instagram.domain.comment.model.Comment
 import com.team10.instagram.domain.comment.repository.CommentRepository
@@ -19,6 +20,7 @@ class DataGenerator(
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
     private val followRepository: FollowRepository,
+    private val albumRepository: AlbumRepository,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     // Generate User
@@ -82,4 +84,10 @@ class DataGenerator(
             toUserId = toUser.userId!!,
         )
     }
+
+    // Generate album
+    fun generateAlbum(
+        user: User,
+        title: String? = null,
+    ): Long = albumRepository.save(user.userId!!, title ?: "테스트 앨범 ${Random.nextInt(1000)}")
 }
