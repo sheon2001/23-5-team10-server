@@ -215,4 +215,64 @@ class AlbumIntegrationTest
             assertNotNull(savedPost)
             assertNull(savedPost?.albumId)
         }
+
+        @Test
+        fun `이미 존재하는 앨범 이름으로 생성하면 실패한다`() {
+            // given
+            val duplicateTitle = "제주도 여행"
+
+            dataGenerator.generateAlbum(myUser, duplicateTitle)
+
+            // 똑같은 이름으로 생성 요청 객체 만들기
+            val request = AlbumCreateRequest(title = duplicateTitle)
+
+            // when & then
+            mvc
+                .perform(
+                    post("/api/v1/albums")
+                        .header("Authorization", myToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)),
+                ).andDo(print())
+                .andExpect(status().isConflict) // 409 Conflict 확인
+                .andExpect(jsonPath("$.code").value("ALBUM_ALREADY_EXISTS"))
+        }
+
+        @Test
+        fun `다른 앨범에 있는 게시글을 제외하려고 하면 실패한다`() {
+            // given
+            val albumAId = dataGenerator.generateAlbum(myUser, "앨범 A")
+            val albumBId = dataGenerator.generateAlbum(myUser, "앨범 B")
+
+            val post = dataGenerator.generatePost(myUser)
+
+            albumRepository.updatePostAlbum(post.id!!, albumBId)
+
+            // when & then
+            // 내 앨범은 맞지만 잘못된 요청
+            mvc
+                .perform(
+                    delete("/api/v1/albums/$albumAId/posts/${post.id}")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isBadRequest) // 400 Bad Request 확인
+                .andExpect(jsonPath("$.code").value("POST_NOT_IN_ALBUM"))
+        }
+
+        @Test
+        fun `존재하지 않는 게시글을 앨범에 추가하면 실패한다`() {
+            // given
+            val albumId = dataGenerator.generateAlbum(myUser)
+
+            val wrongPostId = 99999L // 존재하지 않는 ID
+
+            // when & then
+            mvc
+                .perform(
+                    post("/api/v1/albums/$albumId/posts/$wrongPostId")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isNotFound)
+                .andExpect(jsonPath("$.code").value("POST_NOT_FOUND"))
+        }
     }
