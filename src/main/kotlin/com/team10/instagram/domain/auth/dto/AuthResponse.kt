@@ -25,4 +25,9 @@ class AuthResponse {
     data class CheckAccountResponse(
         val sentEmail: String,
     )
+
+    data class CheckNicknameResponse(
+        @Schema(description = "닉네임 사용 가능 여부", example = "true")
+        val isAvailable: Boolean,
+    )
 }

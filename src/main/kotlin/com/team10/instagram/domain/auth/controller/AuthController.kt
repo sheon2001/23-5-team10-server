@@ -1,10 +1,12 @@
 package com.team10.instagram.domain.auth.controller
 
 import com.team10.instagram.domain.auth.dto.AuthRequest.CheckAccountRequest
+import com.team10.instagram.domain.auth.dto.AuthRequest.CheckNicknameRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.LoginRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RefreshRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RegisterRequest
 import com.team10.instagram.domain.auth.dto.AuthResponse.CheckAccountResponse
+import com.team10.instagram.domain.auth.dto.AuthResponse.CheckNicknameResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RegisterResponse
@@ -14,6 +16,7 @@ import com.team10.instagram.global.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -96,6 +99,15 @@ class AuthController(
         val checkAccountResponse = authService.checkAccount(request.identity)
         return ApiResponse.onSuccess(checkAccountResponse)
     }
+
+    @GetMapping("/check-nickname")
+    fun checkNickname(
+        @Valid @RequestBody request: CheckNicknameRequest,
+    ): ApiResponse<CheckNicknameResponse> {
+        val checkNickNameResponse = authService.checkNickname(request.nickname)
+        return ApiResponse.onSuccess(checkNickNameResponse)
+    }
+
 /*
     // TODO
     @PostMapping("/oauth")

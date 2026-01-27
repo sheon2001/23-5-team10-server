@@ -1,6 +1,7 @@
 package com.team10.instagram.domain.auth.service
 
 import com.team10.instagram.domain.auth.dto.AuthResponse.CheckAccountResponse
+import com.team10.instagram.domain.auth.dto.AuthResponse.CheckNicknameResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
@@ -26,6 +27,8 @@ class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtTokenBlacklistService: JwtTokenBlacklistService,
 ) {
+    private val maxNicknameLength = 30
+
     fun register(
         email: String,
         password: String,
@@ -36,6 +39,9 @@ class AuthService(
         }
         if (userRepository.existsByNickname(nickname)) {
             throw CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS)
+        }
+        if (!isValidNicknameFormat(nickname)) {
+            throw CustomException(ErrorCode.INVALID_NICKNAME_FORMAT)
         }
 
         userRepository.save(
@@ -186,5 +192,22 @@ class AuthService(
         val masked = "*".repeat(local.length - visibleCount)
 
         return "$visible$masked@$domain"
+    }
+
+    fun checkNickname(nickname: String): CheckNicknameResponse {
+        if (userRepository.existsByEmail(nickname)) {
+            throw CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS, mapOf("isAvailable" to false))
+        }
+
+        if (!isValidNicknameFormat(nickname)) {
+            throw CustomException(ErrorCode.INVALID_NICKNAME_FORMAT)
+        }
+
+        return CheckNicknameResponse(isAvailable = true)
+    }
+
+    private fun isValidNicknameFormat(nickname: String): Boolean {
+        val regex = Regex("^[a-z0-9_.]{1,$maxNicknameLength}$")
+        return nickname.matches(regex)
     }
 }
