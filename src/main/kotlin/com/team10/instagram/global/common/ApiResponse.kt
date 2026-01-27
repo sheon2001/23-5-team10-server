@@ -15,7 +15,7 @@ data class ApiResponse<T>(
                 // 성공 여부 (Boolean)
                 isSuccess = true,
                 // 응답 코드 (String)
-                code = "200",
+                code = "SUCCESS",
                 // 메시지 (String)
                 message = "요청에 성공하였습니다.",
                 // 실제 들어갈 데이터 (Generic)
