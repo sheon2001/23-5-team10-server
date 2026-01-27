@@ -170,6 +170,7 @@ class AuthService(
             }
 
         // 이메일 전송
+        // if(이메일 전송 실패) throw CustomException(ErrorCode.EMAIL_SEND_FAILED, mapOf("isExist" to true, "isSent" to false))
 
         val sentEmail = maskEmail(email)
         return CheckAccountResponse(sentEmail)
