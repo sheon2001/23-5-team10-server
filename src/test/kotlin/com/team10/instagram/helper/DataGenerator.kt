@@ -8,6 +8,7 @@ import com.team10.instagram.domain.follow.repository.FollowRepository
 import com.team10.instagram.domain.post.model.Post
 import com.team10.instagram.domain.post.model.PostImage
 import com.team10.instagram.domain.post.repository.PostRepository
+import com.team10.instagram.domain.story.repository.StoryRepository
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import org.springframework.stereotype.Component
@@ -21,6 +22,7 @@ class DataGenerator(
     private val commentRepository: CommentRepository,
     private val followRepository: FollowRepository,
     private val albumRepository: AlbumRepository,
+    private val storyRepository: StoryRepository,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     // Generate User
@@ -90,4 +92,15 @@ class DataGenerator(
         user: User,
         title: String? = null,
     ): Long = albumRepository.save(user.userId!!, title ?: "테스트 앨범 ${Random.nextInt(1000)}")
+
+    // Generate story
+    fun generateStory(
+        user: User,
+        imageUrl: String? = null,
+    ) {
+        storyRepository.save(
+            userId = user.userId!!,
+            imageUrl = imageUrl ?: "https://story-image.com/${Random.nextInt(1000)}.jpg",
+        )
+    }
 }
