@@ -7,6 +7,8 @@ import com.team10.instagram.domain.comment.repository.CommentRepository
 import com.team10.instagram.domain.follow.repository.FollowRepository
 import com.team10.instagram.domain.post.model.Post
 import com.team10.instagram.domain.post.model.PostImage
+import com.team10.instagram.domain.post.model.PostLike
+import com.team10.instagram.domain.post.repository.PostLikeRepository
 import com.team10.instagram.domain.post.repository.PostRepository
 import com.team10.instagram.domain.story.repository.StoryRepository
 import com.team10.instagram.domain.user.model.User
@@ -19,6 +21,7 @@ import kotlin.random.Random
 class DataGenerator(
     private val userRepository: UserRepository,
     private val postRepository: PostRepository,
+    private val postLikeRepository: PostLikeRepository,
     private val commentRepository: CommentRepository,
     private val followRepository: FollowRepository,
     private val albumRepository: AlbumRepository,
@@ -61,6 +64,18 @@ class DataGenerator(
             ),
         )
     }
+
+    // Generate like
+    fun generateLike(
+        post: Post,
+        user: User,
+    ): PostLike =
+        postLikeRepository.save(
+            PostLike(
+                postId = post.id!!,
+                userId = user.userId!!,
+            ),
+        )
 
     // Generate single comment
     fun generateComment(

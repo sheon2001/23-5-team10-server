@@ -255,7 +255,7 @@ class AlbumIntegrationTest
                     delete("/api/v1/albums/$albumAId/posts/${post.id}")
                         .header("Authorization", myToken),
                 ).andDo(print())
-                .andExpect(status().isBadRequest) // 400 Bad Request 확인
+                .andExpect(status().isBadRequest)
                 .andExpect(jsonPath("$.code").value("POST_NOT_IN_ALBUM"))
         }
 
@@ -274,5 +274,109 @@ class AlbumIntegrationTest
                 ).andDo(print())
                 .andExpect(status().isNotFound)
                 .andExpect(jsonPath("$.code").value("POST_NOT_FOUND"))
+        }
+
+        @Test
+        fun `앨범에 속하지 않은 게시글이 있으면 '앨범 없음' 앨범으로 조회된다`() {
+            // given
+            // 1. 일반 앨범 생성
+            dataGenerator.generateAlbum(myUser, "내 앨범")
+
+            // 2. 앨범에 속하지 않은 게시글 생성 (album_id = null)
+            val unassignedPost = dataGenerator.generatePost(myUser, images = listOf("http://no-album.com"))
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/albums/my")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isOk)
+                // then
+                // 1. 전체 개수는 2개여야 함 (앨범 없음 + 내 앨범)
+                .andExpect(jsonPath("$.data.length()").value(2))
+                // 2. 맨 첫 번째(0번 인덱스)가 '앨범 없음' 앨범이어야 함
+                .andExpect(jsonPath("$.data[0].albumId").value(-1)) // 약속된 ID -1
+                .andExpect(jsonPath("$.data[0].title").value("앨범 없음"))
+                .andExpect(jsonPath("$.data[0].postCount").value(1))
+                .andExpect(jsonPath("$.data[0].thumbnailImageUrl").value("http://no-album.com"))
+                // 3. 두 번째는 내가 만든 앨범
+                .andExpect(jsonPath("$.data[1].title").value("내 앨범"))
+        }
+
+        @Test
+        fun `앨범 미지정 게시글이 없으면 '앨범 없음' 앨범은 보이지 않는다`() {
+            // given
+            val albumId = dataGenerator.generateAlbum(myUser, "내 앨범")
+            val post = dataGenerator.generatePost(myUser)
+            // 게시글을 앨범에 넣어버림 -> 미지정 게시글 0개
+            albumRepository.updatePostAlbum(post.id!!, albumId)
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/albums/my")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isOk)
+                // then
+                // 1. 전체 개수는 1개 (내 앨범만)
+                .andExpect(jsonPath("$.data.length()").value(1))
+                // 2. '기타' 앨범(-1)은 없어야 함
+                .andExpect(jsonPath("$.data[?(@.albumId == -1)]").doesNotExist())
+        }
+
+        @Test
+        fun `'앨범 없음(-1)' 상세 조회 시, 앨범에 속하지 않은 게시글 목록이 반환된다`() {
+            // given
+            // 1. 미지정 게시글 2개 생성
+            val post1 = dataGenerator.generatePost(myUser, images = listOf("http://img1.com"))
+            val post2 = dataGenerator.generatePost(myUser, images = listOf("http://img2.com"))
+
+            // 2. 일반 앨범에 속한 게시글 1개 생성
+            val albumId = dataGenerator.generateAlbum(myUser)
+            val assignedPost = dataGenerator.generatePost(myUser)
+            albumRepository.updatePostAlbum(assignedPost.id!!, albumId)
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/albums/-1") // 약속된 ID -1 호출
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isOk)
+                // then
+                .andExpect(jsonPath("$.data.title").value("앨범 없음")) // 타이틀 확인
+                .andExpect(jsonPath("$.data.albumId").value(-1))
+                .andExpect(jsonPath("$.data.posts.length()").value(2)) // 미지정 게시글 2개만 나와야 함
+                // 최신순 정렬 확인 (post2가 나중에 생성됨)
+                .andExpect(jsonPath("$.data.posts[0].postId").value(post2.id))
+                .andExpect(jsonPath("$.data.posts[0].imageUrl").value("http://img2.com"))
+                .andExpect(jsonPath("$.data.posts[1].postId").value(post1.id))
+        }
+
+        @Test
+        fun `앨범 상세 조회 시 좋아요와 댓글 개수가 포함된다`() {
+            // given
+            val albumId = dataGenerator.generateAlbum(myUser, "인기 앨범")
+            val post = dataGenerator.generatePost(myUser)
+            albumRepository.updatePostAlbum(post.id!!, albumId)
+
+            dataGenerator.generateComment(post, myUser, "댓글1")
+            dataGenerator.generateComment(post, myUser, "댓글2")
+
+            dataGenerator.generateLike(post, myUser)
+
+            // when
+            mvc
+                .perform(
+                    get("/api/v1/albums/$albumId")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isOk)
+                // then
+                .andExpect(jsonPath("$.data.posts[0].postId").value(post.id))
+                .andExpect(jsonPath("$.data.posts[0].commentCount").value(2))
+                .andExpect(jsonPath("$.data.posts[0].likeCount").value(1))
         }
     }
