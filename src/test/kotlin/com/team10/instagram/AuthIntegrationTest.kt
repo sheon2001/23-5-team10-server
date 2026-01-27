@@ -101,7 +101,7 @@ class AuthIntegrationTest
 
             val response = objectMapper.readTree(result.response.contentAsString)
             val errorCode = response.get("code").asText()
-            assert(errorCode == "401")
+            assert(errorCode == "INVALID_PASSWORD")
         }
 
         @Test
@@ -119,7 +119,7 @@ class AuthIntegrationTest
 
             val response = objectMapper.readTree(result.response.contentAsString)
             val errorCode = response.get("code").asText()
-            assert(errorCode == "404")
+            assert(errorCode == "USER_NOT_FOUND")
         }
 
         @Test
@@ -288,7 +288,7 @@ class AuthIntegrationTest
                     .andReturn()
 
             val code = objectMapper.readTree(secondResult.response.contentAsString).get("code").asText()
-            assert(code == "401") // REFRESH_TOKEN_REUSE_DETECTED
+            assert(code == "REFRESH_TOKEN_REUSE_DETECTED")
         }
 
         @Test
@@ -305,6 +305,6 @@ class AuthIntegrationTest
                     .andReturn()
 
             val code = objectMapper.readTree(result.response.contentAsString).get("code").asText()
-            assert(code == "401") // INVALID_REFRESH_TOKEN
+            assert(code == "INVALID_REFRESH_TOKEN")
         }
     }
