@@ -38,4 +38,10 @@ class AuthRequest {
     data class RefreshRequest(
         val refreshToken: String,
     )
+
+    data class CheckAccountRequest(
+        @field:NotBlank
+        @Schema(description = "사용자 닉네임 또는 이메일", example = "test_user_123")
+        val identity: String,
+    )
 }

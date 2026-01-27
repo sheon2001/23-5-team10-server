@@ -21,4 +21,8 @@ class AuthResponse {
         val accessToken: String,
         val refreshToken: String,
     )
+
+    data class CheckAccountResponse(
+        val sentEmail: String,
+    )
 }

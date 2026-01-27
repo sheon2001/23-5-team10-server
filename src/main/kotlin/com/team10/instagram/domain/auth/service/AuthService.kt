@@ -1,5 +1,6 @@
 package com.team10.instagram.domain.auth.service
 
+import com.team10.instagram.domain.auth.dto.AuthResponse.CheckAccountResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
@@ -150,5 +151,39 @@ class AuthService(
                 )
 
         return jwtTokenProvider.createAccessToken(user.userId!!)
+    }
+
+    fun checkAccount(identity: String): CheckAccountResponse {
+        val email =
+            when {
+                identity.contains("@") -> {
+                    userRepository
+                        .findByEmail(identity)
+                        ?.email
+                        ?: throw CustomException(ErrorCode.ACCOUNT_NOT_FOUND)
+                }
+
+                else -> {
+                    userRepository.findEmailByNickname(identity)
+                        ?: throw CustomException(ErrorCode.ACCOUNT_NOT_FOUND)
+                }
+            }
+
+        // 이메일 전송
+
+        val sentEmail = maskEmail(email)
+        return CheckAccountResponse(sentEmail)
+    }
+
+    private fun maskEmail(email: String): String {
+        val visibleCount = 1
+        val parts = email.split("@")
+        val local = parts[0]
+        val domain = parts[1]
+
+        val visible = local.take(visibleCount)
+        val masked = "*".repeat(local.length - visibleCount)
+
+        return "$visible$masked@$domain"
     }
 }

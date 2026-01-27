@@ -10,6 +10,8 @@ data class UserDto(
     val email: String,
     @Schema(description = "사용자 닉네임", example = "tester")
     val nickname: String,
+    @Schema(description = "사용자 이름", example = "홍길동")
+    val name: String?,
     @Schema(description = "사용자 프로필 이미지 URL", example = "https://example.com/profile.png", nullable = true)
     val profileImageUrl: String?,
     @Schema(description = "사용자 소개", example = "안녕하세요, 저는 테스터입니다.", nullable = true)
@@ -21,6 +23,7 @@ data class UserDto(
         userId = user.userId!!,
         email = user.email,
         nickname = user.nickname,
+        name = user.name,
         profileImageUrl = user.profileImageUrl,
         bio = user.bio,
         role = user.role.name,
