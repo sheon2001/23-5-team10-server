@@ -186,6 +186,32 @@ class StoryIntegrationTest
                         .header("Authorization", myToken),
                 ).andDo(print())
                 .andExpect(status().isForbidden)
-                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.code").value("STORY_NOT_OWNER"))
+        }
+
+        @Test
+        fun `내 스토리가 존재하면 피드 목록의 맨 처음에 포함된다`() {
+            // given
+            // 1. 친구 생성 및 팔로우
+            val friend = dataGenerator.generateUser(nickname = "friend")
+            dataGenerator.generateFollow(myUser, friend)
+
+            // 2. 스토리 생성 (나 & 친구 둘 다 생성)
+            dataGenerator.generateStory(myUser) // 내 스토리
+            dataGenerator.generateStory(friend) // 친구 스토리
+
+            // when & then
+            mvc
+                .perform(
+                    get("/api/v1/stories/feed")
+                        .header("Authorization", myToken),
+                ).andDo(print())
+                .andExpect(status().isOk)
+                // 검증 1: 총 2명이 조회되어야 함
+                .andExpect(jsonPath("$.data.length()").value(2))
+                // 검증 2: 첫 번째(index 0)는 무조건 '나'여야 함
+                .andExpect(jsonPath("$.data[0].nickname").value(myUser.nickname))
+                // 검증 3: 두 번째(index 1)는 '친구'여야 함
+                .andExpect(jsonPath("$.data[1].nickname").value(friend.nickname))
         }
     }
