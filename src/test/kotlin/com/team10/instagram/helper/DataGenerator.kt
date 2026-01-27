@@ -1,5 +1,6 @@
 package com.team10.instagram.helper
 
+import com.team10.instagram.domain.album.repository.AlbumRepository
 import com.team10.instagram.domain.auth.jwt.JwtTokenProvider
 import com.team10.instagram.domain.comment.model.Comment
 import com.team10.instagram.domain.comment.repository.CommentRepository
@@ -7,6 +8,7 @@ import com.team10.instagram.domain.follow.repository.FollowRepository
 import com.team10.instagram.domain.post.model.Post
 import com.team10.instagram.domain.post.model.PostImage
 import com.team10.instagram.domain.post.repository.PostRepository
+import com.team10.instagram.domain.story.repository.StoryRepository
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import org.springframework.stereotype.Component
@@ -19,6 +21,8 @@ class DataGenerator(
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
     private val followRepository: FollowRepository,
+    private val albumRepository: AlbumRepository,
+    private val storyRepository: StoryRepository,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
     // Generate User
@@ -80,6 +84,23 @@ class DataGenerator(
         followRepository.save(
             fromUserId = fromUser.userId!!,
             toUserId = toUser.userId!!,
+        )
+    }
+
+    // Generate album
+    fun generateAlbum(
+        user: User,
+        title: String? = null,
+    ): Long = albumRepository.save(user.userId!!, title ?: "테스트 앨범 ${Random.nextInt(1000)}")
+
+    // Generate story
+    fun generateStory(
+        user: User,
+        imageUrl: String? = null,
+    ) {
+        storyRepository.save(
+            userId = user.userId!!,
+            imageUrl = imageUrl ?: "https://story-image.com/${Random.nextInt(1000)}.jpg",
         )
     }
 }
