@@ -23,22 +23,57 @@ class AlbumRepository(
 
     // 2. 내 앨범 목록 조회 (썸네일 포함)
     fun findAllByUserId(userId: Long): List<AlbumResponse> {
-        val sql = """
+        // 1) 실제 앨범 목록
+        val albumSql = """
             SELECT a.album_id, a.title,
-                   -- 해당 앨범에 속한 게시글 개수
                    (SELECT COUNT(*) FROM post p WHERE p.album_id = a.album_id) as post_count,
-                   -- 앨범 썸네일 (가장 최근 게시글의 첫 번째 이미지)
                    (SELECT pi.image_url 
                     FROM post p 
                     JOIN post_image pi ON p.post_id = pi.post_id 
                     WHERE p.album_id = a.album_id 
-                    ORDER BY p.created_at DESC LIMIT 1) as thumbnail_image_url
+                    -- 최신 글의 첫 번째 이미지를 가져옴
+                    ORDER BY p.created_at DESC, pi.sort_order ASC 
+                    LIMIT 1) as thumbnail_image_url
             FROM album a
             WHERE a.user_id = ?
             ORDER BY a.created_at DESC, a.album_id DESC
         """
+        val realAlbums = jdbcTemplate.query(albumSql, albumResponseMapper, userId)
 
-        return jdbcTemplate.query(sql, albumResponseMapper, userId)
+        // 2) '앨범 없음' 게시글 목록
+        val unassignedSql = """
+            SELECT 
+                COUNT(*) as post_count,
+                (SELECT pi.image_url 
+                 FROM post p2 
+                 JOIN post_image pi ON p2.post_id = pi.post_id 
+                 WHERE p2.user_id = ? AND p2.album_id IS NULL 
+                 ORDER BY p2.created_at DESC, pi.sort_order ASC 
+                 LIMIT 1) as thumbnail_image_url
+            FROM post p
+            WHERE p.user_id = ? AND p.album_id IS NULL
+        """
+
+        val unassignedAlbum =
+            jdbcTemplate.queryForObject(unassignedSql, { rs, _ ->
+                val count = rs.getInt("post_count")
+                if (count > 0) {
+                    AlbumResponse(
+                        albumId = -1L,
+                        title = "앨범 없음",
+                        thumbnailImageUrl = rs.getString("thumbnail_image_url"),
+                        postCount = count,
+                    )
+                } else {
+                    null
+                }
+            }, userId, userId)
+
+        return if (unassignedAlbum != null) {
+            listOf(unassignedAlbum) + realAlbums
+        } else {
+            realAlbums
+        }
     }
 
     // 3. 앨범 단건 조회 (제목 등 기본 정보) -> 검증용
@@ -80,10 +115,14 @@ class AlbumRepository(
                     FROM post_image pi 
                     WHERE pi.post_id = p.post_id 
                     ORDER BY pi.sort_order ASC
-                    LIMIT 1) as image_url
+                    LIMIT 1) as image_url,
+
+                    (SELECT COUNT(*) FROM post_like pl WHERE pl.post_id = p.post_id) as like_count,
+                    (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.post_id) as comment_count
+                    
             FROM post p
             WHERE p.album_id = ?
-            ORDER BY p.created_at DESC
+            ORDER BY p.created_at DESC, p.post_id DESC
         """
 
         return jdbcTemplate.query(
@@ -92,6 +131,8 @@ class AlbumRepository(
                 AlbumPostDto(
                     postId = rs.getLong("post_id"),
                     imageUrl = rs.getString("image_url"),
+                    likeCount = rs.getInt("like_count"),
+                    commentCount = rs.getInt("comment_count"),
                 )
             },
             albumId,
@@ -136,6 +177,35 @@ class AlbumRepository(
         val sql = "SELECT COUNT(*) FROM album WHERE user_id = ? AND title = ?"
         val count = jdbcTemplate.queryForObject(sql, Int::class.java, userId, title) ?: 0
         return count > 0
+    }
+
+    // 10. 앨범 미지정 게시글 목록 조회
+    fun findUnassignedPosts(userId: Long): List<AlbumPostDto> {
+        val sql = """
+            SELECT p.post_id,
+                   -- 썸네일
+                   (SELECT pi.image_url 
+                    FROM post_image pi 
+                    WHERE pi.post_id = p.post_id 
+                    ORDER BY pi.sort_order ASC LIMIT 1) as image_url,
+                    
+                    (SELECT COUNT(*) FROM post_like pl WHERE pl.post_id = p.post_id) as like_count,
+                    (SELECT COUNT(*) FROM comment c WHERE c.post_id = p.post_id) as comment_count
+                   
+            FROM post p
+            WHERE p.user_id = ? 
+              AND p.album_id IS NULL
+            ORDER BY p.created_at DESC, p.post_id DESC
+        """
+
+        return jdbcTemplate.query(sql, { rs, _ ->
+            AlbumPostDto(
+                postId = rs.getLong("post_id"),
+                imageUrl = rs.getString("image_url"),
+                likeCount = rs.getInt("like_count"),
+                commentCount = rs.getInt("comment_count"),
+            )
+        }, userId)
     }
 
     private val albumResponseMapper =

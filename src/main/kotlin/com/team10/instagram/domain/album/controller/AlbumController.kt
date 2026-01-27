@@ -48,9 +48,10 @@ class AlbumController(
     @GetMapping("/{albumId}")
     @Operation(summary = "앨범 상세 조회", description = "해당 앨범에 포함된 게시글 목록을 조회합니다.")
     fun getAlbumDetail(
+        @LoggedInUser loggedInUser: Long,
         @PathVariable albumId: Long,
     ): ApiResponse<AlbumDetailResponse> {
-        val albumDetails = albumService.getAlbumDetail(albumId)
+        val albumDetails = albumService.getAlbumDetail(loggedInUser, albumId)
         return ApiResponse.onSuccess(albumDetails)
     }
 

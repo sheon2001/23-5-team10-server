@@ -20,4 +20,6 @@ data class AlbumDetailResponse(
 data class AlbumPostDto(
     val postId: Long,
     val imageUrl: String,
+    val likeCount: Int,
+    val commentCount: Int,
 )
