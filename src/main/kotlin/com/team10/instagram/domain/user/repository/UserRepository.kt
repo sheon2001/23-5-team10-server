@@ -22,4 +22,6 @@ interface UserRepository : CrudRepository<User, Long> {
     ): User?
 
     fun deleteByUserId(userId: Long)
+
+    fun findEmailByNickname(nickname: String): String?
 }

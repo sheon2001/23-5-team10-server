@@ -1,8 +1,10 @@
 package com.team10.instagram.domain.auth.controller
 
+import com.team10.instagram.domain.auth.dto.AuthRequest.CheckAccountRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.LoginRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RefreshRequest
 import com.team10.instagram.domain.auth.dto.AuthRequest.RegisterRequest
+import com.team10.instagram.domain.auth.dto.AuthResponse.CheckAccountResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.LoginResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RefreshResponse
 import com.team10.instagram.domain.auth.dto.AuthResponse.RegisterResponse
@@ -85,6 +87,14 @@ class AuthController(
         val accessToken = authorizationHeader.replace("Bearer", "").trim()
         authService.logout(accessToken)
         return ApiResponse.onSuccess("Logged out successfully")
+    }
+
+    @PostMapping("/check-account")
+    fun checkAccount(
+        @Valid @RequestBody request: CheckAccountRequest,
+    ): ApiResponse<CheckAccountResponse> {
+        val checkAccountResponse = authService.checkAccount(request.identity)
+        return ApiResponse.onSuccess(checkAccountResponse)
     }
 /*
     // TODO
