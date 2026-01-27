@@ -39,4 +39,8 @@ enum class ErrorCode(
     ALBUM_NOT_FOUND(HttpStatus.NOT_FOUND, "ALBUM_NOT_FOUND", "앨범을 찾을 수 없습니다."),
     ALBUM_ALREADY_EXISTS(HttpStatus.CONFLICT, "ALBUM_ALREADY_EXISTS", "이미 존재하는 앨범 이름입니다."),
     POST_NOT_IN_ALBUM(HttpStatus.BAD_REQUEST, "POST_NOT_IN_ALBUM", "해당 앨범에 포함된 게시글이 아닙니다."),
+
+    // Story (스토리 관련)
+    STORY_NOT_FOUND(HttpStatus.NOT_FOUND, "STORY_NOT_FOUND", "스토리를 찾을 수 없거나 이미 만료되었습니다."),
+    STORY_NOT_OWNER(HttpStatus.FORBIDDEN, "STORY_NOT_OWNER", "스토리 삭제 권한이 없습니다."),
 }
