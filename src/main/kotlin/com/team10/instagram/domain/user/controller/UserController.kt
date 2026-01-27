@@ -43,7 +43,7 @@ class UserController(
     @GetMapping("/{userId}/posts")
     @Operation(summary = "유저 게시글 목록 조회", description = "특정 유저가 작성한 게시글 목록을 최신순으로 조회합니다.")
     fun getUserPosts(
-        @LoggedInUser user: User,
+        @Parameter(hidden = true) @LoggedInUser user: User,
         @PathVariable userId: Long,
     ): ApiResponse<Map<String, List<PostResponse>>> {
         val posts = postService.getPostsByUserId(user, userId)
