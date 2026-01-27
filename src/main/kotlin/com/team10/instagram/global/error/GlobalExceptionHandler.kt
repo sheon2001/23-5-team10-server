@@ -15,10 +15,10 @@ private val logger = KotlinLogging.logger {}
 class GlobalExceptionHandler {
     // 1. 커스텀 에러 처리
     @ExceptionHandler(CustomException::class)
-    fun handleCustomException(e: CustomException): ResponseEntity<ApiResponse<Nothing>> =
+    fun handleCustomException(e: CustomException): ResponseEntity<ApiResponse<Any?>> =
         ResponseEntity
             .status(e.errorCode.status)
-            .body(ApiResponse.onFailure(e.errorCode.code, e.errorCode.message))
+            .body(ApiResponse.onFailure(e.errorCode.code, e.errorCode.message, e.data))
 
     // 2. @Valid 유효성 검사 실패 처리
     @ExceptionHandler(MethodArgumentNotValidException::class)
