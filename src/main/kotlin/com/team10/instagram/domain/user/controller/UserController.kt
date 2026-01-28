@@ -5,6 +5,8 @@ import com.team10.instagram.domain.post.dto.PostResponse
 import com.team10.instagram.domain.post.service.PostService
 import com.team10.instagram.domain.user.LoggedInUser
 import com.team10.instagram.domain.user.dto.UserDto
+import com.team10.instagram.domain.user.dto.UserSearchRequest
+import com.team10.instagram.domain.user.dto.UserSearchResponse
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.service.UserService
 import com.team10.instagram.global.common.ApiResponse
@@ -12,9 +14,11 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -71,5 +75,13 @@ class UserController(
         jwtTokenBlacklistService.add(token)
 
         return ApiResponse.onSuccess("Account deleted successfully")
+    }
+
+    @GetMapping("/search")
+    fun search(
+        @Valid @RequestBody request: UserSearchRequest,
+    ): ApiResponse<UserSearchResponse> {
+        val response = userService.search(request.q)
+        return ApiResponse.onSuccess(response)
     }
 }

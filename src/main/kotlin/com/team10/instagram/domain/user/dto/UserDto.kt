@@ -2,6 +2,7 @@ package com.team10.instagram.domain.user.dto
 
 import com.team10.instagram.domain.user.model.User
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 
 data class UserDto(
     @Schema(description = "사용자 식별을 위한 아이디", example = "1")
@@ -29,3 +30,19 @@ data class UserDto(
         role = user.role.name,
     )
 }
+
+data class UserSearchRequest(
+    @field:NotBlank
+    @Schema(description = "검색어", example = "tester")
+    val q: String,
+)
+
+data class UserSearchResponseDtoUnit(
+    val userId: Long,
+    val nickname: String,
+    val profileImageUrl: String?,
+)
+
+data class UserSearchResponse(
+    val users: List<UserSearchResponseDtoUnit>,
+)

@@ -24,4 +24,9 @@ interface UserRepository : CrudRepository<User, Long> {
     fun deleteByUserId(userId: Long)
 
     fun findEmailByNickname(nickname: String): String?
+
+    fun findByNicknameContainingIgnoreCaseOrNameContainingIgnoreCase(
+        nickname: String,
+        name: String,
+    ): List<User>
 }

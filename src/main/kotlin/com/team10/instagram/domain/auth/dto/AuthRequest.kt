@@ -44,4 +44,10 @@ class AuthRequest {
         @Schema(description = "사용자 닉네임 또는 이메일", example = "test_user_123")
         val identity: String,
     )
+
+    data class CheckNicknameRequest(
+        @field:NotBlank
+        @Schema(description = "사용 가능 여부를 확인할 닉네임", example = "test_user_123")
+        val nickname: String,
+    )
 }
