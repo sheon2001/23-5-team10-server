@@ -63,7 +63,7 @@ class JwtAuthenticationFilter(
         } else if (token != null && jwtTokenProvider.validateToken(token, jwtTokenBlacklistService)) {
             val userId = jwtTokenProvider.getUserId(token)
             request.setAttribute("userId", userId)
-            val user = userRepository.findById(userId).orElse(null)
+            val user = userRepository.findByUserId(userId)
             if (user != null) {
                 val auth =
                     UsernamePasswordAuthenticationToken(

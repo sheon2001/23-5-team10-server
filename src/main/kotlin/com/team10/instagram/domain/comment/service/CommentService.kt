@@ -55,7 +55,7 @@ class CommentService(
         val comments = commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId)
         return comments.map { comment ->
             val writer =
-                userRepository.findByIdOrNull(comment.userId)
+                userRepository.findByUserId(comment.userId)
                     ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
             convertToDto(comment, writer)
         }

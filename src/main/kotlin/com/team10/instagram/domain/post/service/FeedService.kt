@@ -60,7 +60,7 @@ class FeedService(
         val items =
             posts.map { post ->
                 val author =
-                    userRepository.findByIdOrNull(post.userId)
+                    userRepository.findByUserId(post.userId)
                         ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
 
                 val likeCount = postLikeRepository.countByPostId(post.id!!)
