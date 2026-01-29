@@ -82,8 +82,9 @@ class UserController(
     @GetMapping("/search")
     fun search(
         @RequestParam @NotBlank q: String,
+        @Parameter(hidden = true) @LoggedInUser user: User,
     ): ApiResponse<UserSearchResponse> {
-        val response = userService.search(q)
+        val response = userService.search(user.userId!!, q)
         return ApiResponse.onSuccess(response)
     }
 

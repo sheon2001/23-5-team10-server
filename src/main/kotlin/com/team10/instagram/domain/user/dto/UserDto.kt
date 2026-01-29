@@ -41,6 +41,8 @@ data class UserSearchResponseDtoUnit(
     val userId: Long,
     val nickname: String,
     val profileImageUrl: String?,
+    val name: String?,
+    val isFollowed: Boolean,
 )
 
 data class UserSearchResponse(

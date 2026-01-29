@@ -21,7 +21,10 @@ class UserService(
         userRepository.deleteByUserId(userId)
     }
 
-    fun search(q: String): UserSearchResponse {
+    fun search(
+        loggedInUserId: Long,
+        q: String,
+    ): UserSearchResponse {
         val users = userRepository.findByNicknameContainingIgnoreCaseOrNameContainingIgnoreCase(q, q)
         val userDtos: List<UserSearchResponseDtoUnit> =
             users.map { user ->
@@ -29,6 +32,8 @@ class UserService(
                     userId = user.userId!!,
                     nickname = user.nickname,
                     profileImageUrl = user.profileImageUrl,
+                    name = user.name,
+                    isFollowed = followRepository.exists(loggedInUserId, user.userId!!),
                 )
             }
         return UserSearchResponse(userDtos)
