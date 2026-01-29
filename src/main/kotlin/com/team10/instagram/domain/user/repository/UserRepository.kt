@@ -29,4 +29,6 @@ interface UserRepository : CrudRepository<User, Long> {
         nickname: String,
         name: String,
     ): List<User>
+
+    fun findAllByUserIdIn(userIds: Collection<Long>): List<User>
 }
