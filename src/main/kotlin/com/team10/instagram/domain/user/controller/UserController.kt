@@ -4,6 +4,7 @@ import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
 import com.team10.instagram.domain.post.dto.PostResponse
 import com.team10.instagram.domain.post.service.PostService
 import com.team10.instagram.domain.user.LoggedInUser
+import com.team10.instagram.domain.user.dto.ProfileResponse
 import com.team10.instagram.domain.user.dto.UserDto
 import com.team10.instagram.domain.user.dto.UserSearchResponse
 import com.team10.instagram.domain.user.model.User
@@ -83,6 +84,15 @@ class UserController(
         @RequestParam @NotBlank q: String,
     ): ApiResponse<UserSearchResponse> {
         val response = userService.search(q)
+        return ApiResponse.onSuccess(response)
+    }
+
+    @GetMapping("/{userId}/profile")
+    fun getProfile(
+        @RequestParam @NotBlank userId: Long,
+        @Parameter(hidden = true) @LoggedInUser user: User,
+    ): ApiResponse<ProfileResponse> {
+        val response = userService.getProfile(userId, user)
         return ApiResponse.onSuccess(response)
     }
 }

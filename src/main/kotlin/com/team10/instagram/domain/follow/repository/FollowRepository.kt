@@ -3,6 +3,7 @@ package com.team10.instagram.domain.follow.repository
 import com.team10.instagram.domain.follow.dto.FollowResponse
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.queryForObject
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -74,6 +75,18 @@ class FollowRepository(
         val sql = "SELECT to_user_id FROM follow WHERE from_user_id = ?"
 
         return jdbcTemplate.queryForList(sql, Long::class.java, fromUserId)
+    }
+
+    // 7. 팔로잉 수 조회
+    fun countFollowings(fromUserId: Long): Long {
+        val sql = "SELECT count(*) FROM follow WHERE from_user_id = ?"
+        return jdbcTemplate.queryForObject(sql, Long::class.java, fromUserId) ?: 0
+    }
+
+    // 8. 팔로워 수 조회
+    fun countFollowers(toUserId: Long): Long {
+        val sql = "SELECT count(*) FROM follow WHERE to_user_id = ?"
+        return jdbcTemplate.queryForObject(sql, Long::class.java, toUserId) ?: 0
     }
 
     // DB 결과를 DTO로 변환

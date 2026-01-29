@@ -12,7 +12,6 @@ import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import com.team10.instagram.global.error.CustomException
 import com.team10.instagram.global.error.ErrorCode
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.ceil

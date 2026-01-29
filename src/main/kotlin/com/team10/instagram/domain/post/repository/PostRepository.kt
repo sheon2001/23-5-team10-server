@@ -53,4 +53,6 @@ interface PostRepository : CrudRepository<Post, Long> {
     fun findUserIdByPostId(
         @Param("postId") postId: Long,
     ): Long?
+
+    fun countByUserId(userId: Long): Long
 }
