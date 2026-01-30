@@ -1,9 +1,9 @@
 package com.team10.instagram.domain.auth.jwt
 
 import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
+import com.team10.instagram.domain.user.Role
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
-import com.team10.instagram.domain.user.Role
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -21,7 +21,6 @@ class JwtAuthenticationFilter(
     private val jwtTokenBlacklistService: JwtTokenBlacklistService,
     private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
-
     @Value("\${jwt.test-token}")
     private lateinit var testToken: String
 
@@ -35,8 +34,7 @@ class JwtAuthenticationFilter(
         if (token != null) {
             if (token == testToken) {
                 handleTestToken(request)
-            }
-            else if (jwtTokenProvider.validateToken(token!!, jwtTokenBlacklistService)) {
+            } else if (jwtTokenProvider.validateToken(token!!, jwtTokenBlacklistService)) {
                 // 실제 토큰 처리
                 val userId = jwtTokenProvider.getUserId(token!!)
                 request.setAttribute("userId", userId)
@@ -44,11 +42,12 @@ class JwtAuthenticationFilter(
                 val user = userRepository.findByUserId(userId)
 
                 if (user != null) {
-                    val auth = UsernamePasswordAuthenticationToken(
-                        user,
-                        null,
-                        listOf(SimpleGrantedAuthority("ROLE_${user.role.name}"))
-                    )
+                    val auth =
+                        UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            listOf(SimpleGrantedAuthority("ROLE_${user.role.name}")),
+                        )
                     SecurityContextHolder.getContext().authentication = auth
                 }
             }
@@ -60,21 +59,23 @@ class JwtAuthenticationFilter(
     }
 
     private fun handleTestToken(request: HttpServletRequest) {
-        val user = userRepository.findByEmail("test@swagger.com")
-            ?: userRepository.save(
-                User(
-                    email = "test@swagger.com",
-                    password = BCryptPasswordEncoder().encode("password123"),
-                    nickname = "swagger_tester",
-                    role = Role.USER,
-                ),
-            )
+        val user =
+            userRepository.findByEmail("test@swagger.com")
+                ?: userRepository.save(
+                    User(
+                        email = "test@swagger.com",
+                        password = BCryptPasswordEncoder().encode("password123"),
+                        nickname = "swagger_tester",
+                        role = Role.USER,
+                    ),
+                )
         request.setAttribute("userId", user.userId)
-        val auth = UsernamePasswordAuthenticationToken(
-            user,
-            null,
-            listOf(SimpleGrantedAuthority("ROLE_USER")),
-        )
+        val auth =
+            UsernamePasswordAuthenticationToken(
+                user,
+                null,
+                listOf(SimpleGrantedAuthority("ROLE_USER")),
+            )
         SecurityContextHolder.getContext().authentication = auth
     }
 
