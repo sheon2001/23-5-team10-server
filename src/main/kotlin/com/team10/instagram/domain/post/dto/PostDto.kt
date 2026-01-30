@@ -38,6 +38,7 @@ data class PostResponse(
 
 typealias SearchResponse = List<PostResponse>
 typealias BookMarkedSearchResponse = List<PostResponse>
+typealias UserPostSearchResponse = List<PostResponse>
 
 data class PostImageResponse(
     val id: Long,

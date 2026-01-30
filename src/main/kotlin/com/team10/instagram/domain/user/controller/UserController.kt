@@ -1,7 +1,7 @@
 package com.team10.instagram.domain.user.controller
 
 import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
-import com.team10.instagram.domain.post.dto.PostResponse
+import com.team10.instagram.domain.post.dto.UserPostSearchResponse
 import com.team10.instagram.domain.post.service.PostService
 import com.team10.instagram.domain.user.LoggedInUser
 import com.team10.instagram.domain.user.dto.ProfileResponse
@@ -51,9 +51,9 @@ class UserController(
     fun getUserPosts(
         @Parameter(hidden = true) @LoggedInUser user: User,
         @PathVariable userId: Long,
-    ): ApiResponse<Map<String, List<PostResponse>>> {
+    ): ApiResponse<UserPostSearchResponse> {
         val posts = postService.getPostsByUserId(user, userId)
-        return ApiResponse.onSuccess(mapOf("posts" to posts))
+        return ApiResponse.onSuccess(posts)
     }
 
     @Operation(
