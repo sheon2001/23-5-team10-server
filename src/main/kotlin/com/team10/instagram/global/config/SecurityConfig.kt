@@ -61,6 +61,7 @@ class SecurityConfig(
             listOf(
                 "https://www.wfinstaclone.shop", // domain
                 "https://d1ki8kre4wetjx.cloudfront.net", // Front
+                "https://api.wfinstaclone.shop", // Back
                 "http://localhost:3000", // 로컬 (React/Next.js)
                 "http://localhost:5173", // 로컬 (Vite)
                 "http://localhost:8080", // 로컬 (백엔드)
