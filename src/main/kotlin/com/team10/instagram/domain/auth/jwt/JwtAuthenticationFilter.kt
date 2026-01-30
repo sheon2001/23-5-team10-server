@@ -13,7 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
-import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
@@ -22,8 +21,6 @@ class JwtAuthenticationFilter(
     private val jwtTokenBlacklistService: JwtTokenBlacklistService,
     private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
-    private val pathMatcher = AntPathMatcher()
-
     @Value("\${jwt.test-token}")
     private lateinit var testToken: String
 
@@ -32,53 +29,54 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        if (isPublicPath(request.requestURI)) {
-            filterChain.doFilter(request, response)
-            return
-        }
-
         val token = resolveToken(request)
 
-        if (token == testToken) {
-            val user =
-                userRepository.findByEmail("test@swagger.com")
-                    ?: userRepository.save(
-                        User(
-                            email = "test@swagger.com",
-                            password = BCryptPasswordEncoder().encode("password123"),
-                            nickname = "swagger_tester",
-                            role = Role.USER,
-                        ),
-                    )
-            request.setAttribute("userId", user.userId)
-            val auth =
-                UsernamePasswordAuthenticationToken(
-                    user,
-                    null,
-                    listOf(SimpleGrantedAuthority("ROLE_USER")),
-                )
-            SecurityContextHolder.getContext().authentication = auth
-            filterChain.doFilter(request, response)
-            return
-        } else if (token != null && jwtTokenProvider.validateToken(token, jwtTokenBlacklistService)) {
-            val userId = jwtTokenProvider.getUserId(token)
-            request.setAttribute("userId", userId)
-            val user = userRepository.findByUserId(userId)
-            if (user != null) {
-                val auth =
-                    UsernamePasswordAuthenticationToken(
-                        user,
-                        null,
-                        listOf(SimpleGrantedAuthority(user.role.name)),
-                    )
-                SecurityContextHolder.getContext().authentication = auth
+        if (token != null) {
+            if (token == testToken) {
+                handleTestToken(request)
+            } else if (jwtTokenProvider.validateToken(token!!, jwtTokenBlacklistService)) {
+                // 실제 토큰 처리
+                val userId = jwtTokenProvider.getUserId(token!!)
+                request.setAttribute("userId", userId)
+
+                val user = userRepository.findByUserId(userId)
+
+                if (user != null) {
+                    val auth =
+                        UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            listOf(SimpleGrantedAuthority("ROLE_${user.role.name}")),
+                        )
+                    SecurityContextHolder.getContext().authentication = auth
+                }
             }
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing token")
-            return
         }
 
+        // 토큰이 없거나 유효하지 않아도 통과시킴
+        // CORS 요청, Public API, 에러 페이지 등은 SecurityConfig가 알아서 처리
         filterChain.doFilter(request, response)
+    }
+
+    private fun handleTestToken(request: HttpServletRequest) {
+        val user =
+            userRepository.findByEmail("test@swagger.com")
+                ?: userRepository.save(
+                    User(
+                        email = "test@swagger.com",
+                        password = BCryptPasswordEncoder().encode("password123"),
+                        nickname = "swagger_tester",
+                        role = Role.USER,
+                    ),
+                )
+        request.setAttribute("userId", user.userId)
+        val auth =
+            UsernamePasswordAuthenticationToken(
+                user,
+                null,
+                listOf(SimpleGrantedAuthority("ROLE_USER")),
+            )
+        SecurityContextHolder.getContext().authentication = auth
     }
 
     private fun resolveToken(request: HttpServletRequest): String? {
@@ -88,10 +86,4 @@ class JwtAuthenticationFilter(
         }
         return null
     }
-
-    private fun isPublicPath(path: String): Boolean =
-        pathMatcher.match("/api/v1/auth/**", path) ||
-            pathMatcher.match("/swagger-ui/**", path) ||
-            pathMatcher.match("/v3/api-docs/**", path) ||
-            pathMatcher.match("/actuator/health", path)
 }
