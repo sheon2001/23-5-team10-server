@@ -44,4 +44,18 @@ interface SearchHistoryRepository : CrudRepository<Search, Long> {
         @Param("toUserId") toUserId: Long,
         @Param("deletedAt") deletedAt: LocalDateTime = LocalDateTime.now(),
     )
+
+    @Modifying
+    @Query(
+        """
+            UPDATE search_history
+            SET deleted_at = :deletedAt
+            WHERE from_user_id = :fromUserId
+            AND deleted_at IS NULL
+        """,
+    )
+    fun markAllDeleted(
+        @Param("fromUserId") fromUserId: Long,
+        @Param("deletedAt") deletedAt: LocalDateTime = LocalDateTime.now(),
+    )
 }
