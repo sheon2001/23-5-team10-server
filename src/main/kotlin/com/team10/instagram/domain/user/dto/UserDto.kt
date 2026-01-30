@@ -41,8 +41,28 @@ data class UserSearchResponseDtoUnit(
     val userId: Long,
     val nickname: String,
     val profileImageUrl: String?,
+    val name: String?,
+    val isFollowed: Boolean,
 )
 
 data class UserSearchResponse(
     val users: List<UserSearchResponseDtoUnit>,
+)
+
+data class ProfileResponse(
+    @Schema(description = "사용자 식별을 위한 아이디", example = "1")
+    val userId: Long,
+    @Schema(description = "사용자 닉네임", example = "tester")
+    val nickname: String,
+    @Schema(description = "사용자 이름", example = "홍길동")
+    val name: String?,
+    @Schema(description = "사용자 소개", example = "안녕하세요, 저는 테스터입니다.", nullable = true)
+    val bio: String?,
+    @Schema(description = "사용자 프로필 이미지 URL", example = "https://example.com/profile.png", nullable = true)
+    val profileImageUrl: String?,
+    val postCount: Long,
+    val followerCount: Long,
+    val followingCount: Long,
+    val isMe: Boolean,
+    val isFollowed: Boolean,
 )

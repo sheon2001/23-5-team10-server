@@ -4,8 +4,8 @@ import com.team10.instagram.domain.auth.service.JwtTokenBlacklistService
 import com.team10.instagram.domain.post.dto.PostResponse
 import com.team10.instagram.domain.post.service.PostService
 import com.team10.instagram.domain.user.LoggedInUser
+import com.team10.instagram.domain.user.dto.ProfileResponse
 import com.team10.instagram.domain.user.dto.UserDto
-import com.team10.instagram.domain.user.dto.UserSearchRequest
 import com.team10.instagram.domain.user.dto.UserSearchResponse
 import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.service.UserService
@@ -14,16 +14,18 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "User", description = "사용자 API")
@@ -79,9 +81,19 @@ class UserController(
 
     @GetMapping("/search")
     fun search(
-        @Valid @RequestBody request: UserSearchRequest,
+        @RequestParam @NotBlank q: String,
+        @Parameter(hidden = true) @LoggedInUser user: User,
     ): ApiResponse<UserSearchResponse> {
-        val response = userService.search(request.q)
+        val response = userService.search(user.userId!!, q)
+        return ApiResponse.onSuccess(response)
+    }
+
+    @GetMapping("/{userId}/profile")
+    fun getProfile(
+        @RequestParam @NotBlank userId: Long,
+        @Parameter(hidden = true) @LoggedInUser user: User,
+    ): ApiResponse<ProfileResponse> {
+        val response = userService.getProfile(userId, user)
         return ApiResponse.onSuccess(response)
     }
 }

@@ -196,7 +196,7 @@ class PostService(
         currentUser: User?,
     ): PostResponse {
         val author =
-            userRepository.findByIdOrNull(post.userId)
+            userRepository.findByUserId(post.userId)
                 ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
 
         val likeCount = postLikeRepository.countByPostId(post.id!!)

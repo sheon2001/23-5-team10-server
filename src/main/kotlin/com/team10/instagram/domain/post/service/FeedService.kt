@@ -12,7 +12,6 @@ import com.team10.instagram.domain.user.model.User
 import com.team10.instagram.domain.user.repository.UserRepository
 import com.team10.instagram.global.error.CustomException
 import com.team10.instagram.global.error.ErrorCode
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.ceil
@@ -60,7 +59,7 @@ class FeedService(
         val items =
             posts.map { post ->
                 val author =
-                    userRepository.findByIdOrNull(post.userId)
+                    userRepository.findByUserId(post.userId)
                         ?: throw CustomException(ErrorCode.USER_NOT_FOUND)
 
                 val likeCount = postLikeRepository.countByPostId(post.id!!)
