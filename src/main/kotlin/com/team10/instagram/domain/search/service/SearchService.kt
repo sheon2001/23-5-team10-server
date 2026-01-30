@@ -55,4 +55,8 @@ class SearchService(
     ) {
         searchHistoryRepository.markDeleted(fromUserId, toUserId)
     }
+
+    fun deleteAllSearchHistory(fromUserId: Long) {
+        searchHistoryRepository.markDeleted(fromUserId, 0)
+    }
 }

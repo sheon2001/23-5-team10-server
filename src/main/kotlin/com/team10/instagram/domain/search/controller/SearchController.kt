@@ -48,4 +48,12 @@ class SearchController(
         searchService.deleteSearchHistory(user.userId!!, request.toUserId)
         return ApiResponse.onSuccess(Unit)
     }
+
+    @DeleteMapping("/recent/all")
+    fun deleteAllSearchHistory(
+        @Parameter(hidden = true) @LoggedInUser user: User,
+    ): ApiResponse<Unit> {
+        searchService.deleteAllSearchHistory(user.userId!!)
+        return ApiResponse.onSuccess(Unit)
+    }
 }
