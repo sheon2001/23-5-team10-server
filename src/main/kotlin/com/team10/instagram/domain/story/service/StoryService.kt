@@ -1,7 +1,6 @@
 package com.team10.instagram.domain.story.service
 
 import com.team10.instagram.domain.story.dto.StoryCreateRequest
-import com.team10.instagram.domain.story.dto.StoryDetailResponse
 import com.team10.instagram.domain.story.dto.StoryFeedResponse
 import com.team10.instagram.domain.story.dto.UserStoryListResponse
 import com.team10.instagram.domain.story.repository.StoryRepository
@@ -58,7 +57,6 @@ class StoryService(
         loginUserId: Long,
         targetUserId: Long,
     ): UserStoryListResponse {
-
         // 1. 유저 존재 확인
         if (!userRepository.existsById(targetUserId)) {
             throw CustomException(ErrorCode.USER_NOT_FOUND)
@@ -71,22 +69,23 @@ class StoryService(
         val stories = storyRepository.findAllByUserId(targetUserId)
 
         // 4. 타인 조회 시 읽음 처리 및 필터링
-        val processedStories = if (loginUserId != targetUserId) {
-            stories.map { story ->
-                // 조회했음을 DB에 기록
-                storyRepository.saveView(loginUserId, story.id)
-                // 조회수는 가려서 반환
-                story.copy(viewCount = null)
+        val processedStories =
+            if (loginUserId != targetUserId) {
+                stories.map { story ->
+                    // 조회했음을 DB에 기록
+                    storyRepository.saveView(loginUserId, story.id)
+                    // 조회수는 가려서 반환
+                    story.copy(viewCount = null)
+                }
+            } else {
+                // 내 스토리면 그대로 반환
+                stories
             }
-        } else {
-            // 내 스토리면 그대로 반환
-            stories
-        }
 
         // 5. DTO로 감싸서 반환
         return UserStoryListResponse(
             hasUnseenStory = hasUnseen,
-            stories = processedStories
+            stories = processedStories,
         )
     }
 

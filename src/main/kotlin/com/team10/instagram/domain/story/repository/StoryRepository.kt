@@ -122,7 +122,10 @@ class StoryRepository(
     }
 
     // 특정 유저가 올린 스토리 중 내가 확인하지 않은 것이 있는지 확인
-    fun hasUnseenStory(loginUserId: Long, targetUserId: Long): Boolean {
+    fun hasUnseenStory(
+        loginUserId: Long,
+        targetUserId: Long,
+    ): Boolean {
         val sql = """
             SELECT EXISTS (
                 SELECT 1 FROM story s

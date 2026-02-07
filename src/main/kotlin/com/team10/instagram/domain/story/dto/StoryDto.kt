@@ -34,7 +34,6 @@ data class StoryDetailResponse(
 data class UserStoryListResponse(
     @Schema(description = "아직 안 본 스토리가 있는지 여부 (테두리 색상용)", example = "true")
     val hasUnseenStory: Boolean,
-
     @Schema(description = "스토리 상세 목록")
-    val stories: List<StoryDetailResponse>
+    val stories: List<StoryDetailResponse>,
 )

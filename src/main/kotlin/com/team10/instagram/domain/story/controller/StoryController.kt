@@ -1,7 +1,6 @@
 package com.team10.instagram.domain.story.controller
 
 import com.team10.instagram.domain.story.dto.StoryCreateRequest
-import com.team10.instagram.domain.story.dto.StoryDetailResponse
 import com.team10.instagram.domain.story.dto.StoryFeedResponse
 import com.team10.instagram.domain.story.dto.UserStoryListResponse
 import com.team10.instagram.domain.story.service.StoryService
