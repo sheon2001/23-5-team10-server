@@ -5,6 +5,7 @@ import com.team10.instagram.domain.story.dto.StoryFeedResponse
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 class StoryRepository(
@@ -86,7 +87,11 @@ class StoryRepository(
     }
 
     // 6. 스토리 삭제
+    @Transactional
     fun delete(storyId: Long) {
+        val deleteViewsSql = "DELETE FROM story_view WHERE story_id = ?"
+        jdbcTemplate.update(deleteViewsSql, storyId)
+
         val sql = "DELETE FROM story WHERE story_id = ?"
         jdbcTemplate.update(sql, storyId)
     }
