@@ -121,6 +121,26 @@ class StoryRepository(
         }
     }
 
+    // 특정 유저가 올린 스토리 중 내가 확인하지 않은 것이 있는지 확인
+    fun hasUnseenStory(loginUserId: Long, targetUserId: Long): Boolean {
+        val sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM story s
+                WHERE s.user_id = ? 
+                  AND s.created_at > NOW() - INTERVAL 1 DAY
+                  AND NOT EXISTS (
+                      SELECT 1 FROM story_view sv
+                      WHERE sv.story_id = s.story_id AND sv.user_id = ?
+                  )
+            )
+        """
+        return try {
+            jdbcTemplate.queryForObject(sql, Int::class.java, targetUserId, loginUserId) == 1
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     // Mappers
     private val storyFeedMapper =
         RowMapper { rs, _ ->
